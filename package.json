@@ -1,0 +1,28 @@
+{
+  "name": "git-4-csb",
+  "description": "",
+  "author": {
+    "name": "Ray Foss",
+    "email": "no-g4c@vblip.com"
+  },
+  "version": "0.0.1",
+  "license": "GPL-3.0",
+  "scripts": {
+    "predev": "env && node src/main.mjs install",
+    "dev": "nodemon index.mjs"
+  },
+  "bin": {
+    "g4c": "./src/main.mjs"
+  },
+  "engineStrict": true,
+  "engines": {
+    "node": ">= 16"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "rsyncjs": "0.0.12"
+  },
+  "keywords": ["codesandbox", "gitlab"]
+}
