@@ -1,7 +1,7 @@
 import { exec as execCb } from 'child_process'
 import { appendFile, readdir, readFile, mkdir, writeFile } from 'fs/promises'
 import { promisify } from 'util'
-import { REPO_DIR, HOME } from './utils.mjs'
+import { PKG_NAME, REPO_DIR, HOME } from './utils.mjs'
 import Log, {NS} from './logger.mjs'
 const log = new Log({name: 'Install', level: 'warn'})
 const exec = promisify(execCb)
@@ -25,7 +25,7 @@ const ERRORS = new Map([
 ])
 
 class Install {
-  constructor() {
+  constructor(args) {
     this.repoDir = REPO_DIR
     this.remote = process.env[NS + '_REMOTE']
     this.name = process.env[NS + '_NAME'] || 'Sandbox User'
@@ -33,8 +33,10 @@ class Install {
     this.ed25519Key = process.env[NS + '_ED25519']
     this.rsaKey = process.env[NS + '_RSA']
     this.keyName = this.ed25519Key ? 'id_ed25519' : 'id_rsa'
+    this.isMeta = args[0] === 'meta'
     this.promise = this.main()
     log.debug(this)
+
     return this
   }
 
@@ -117,7 +119,7 @@ class Install {
   configureBash = async () => {
     const header = `\n\n# Added by ${NS} #\n`
     const configForSelf = `alias git="node /sandbox/src/main.mjs"\n`
-    const configForOthers = `alias git="node /sandbox/src/main.mjs"\n`
+    const configForOthers = `alias git="node /sandbox/node_modules/${PKG_NAME}/src/main.mjs"\n`
     const config = this.isMeta ? configForSelf : configForOthers
     const bashrcP = `${HOME}/.bashrc`
     try {

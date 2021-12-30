@@ -1,5 +1,6 @@
 import { NS } from './logger.mjs'
 
+export const PKG_NAME = 'git-4-csb'
 export const HOME = process.env.HOME
 export const REPO_DIR = process.env[NS + '_DIR'] || '/tmp/g4c'
 export const PCMD = `cd "${REPO_DIR}" &&`

@@ -128,7 +128,7 @@ const main = async () => {
       break
     case 'i':
     case 'install':
-      const install = new Install()
+      const install = new Install(args)
       await install.promise
       process.stdout.write('インストールに成功\n')
       break

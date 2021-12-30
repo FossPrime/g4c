@@ -41,6 +41,6 @@ Third, configure the CodeSandbox secret environment variables
 - G4C_RSA (alternatively)
   - same thing, but for RSA
 
-Finally, add `"predev": "g4c i || :"` under your package.json scripts. Replace prestart with predevelop, preserve or prestart if you do not have a "dev" script.
+Finally, add `"predev": "npx g4c i || :"` under your package.json scripts. Replace prestart with predevelop, preserve or prestart if you do not have a "dev" script.
 
 "install" scripts **won't work** as we need access to the secrets which are not available at install time, only at final runtime.
