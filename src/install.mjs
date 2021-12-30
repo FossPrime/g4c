@@ -1,5 +1,5 @@
 import { exec as execCb } from 'child_process'
-import { readdir, readFile, mkdir, writeFile } from 'fs/promises'
+import { appendFile, readdir, readFile, mkdir, writeFile } from 'fs/promises'
 import { promisify } from 'util'
 import { REPO_DIR, HOME } from './utils.mjs'
 import Log, {NS} from './logger.mjs'
@@ -17,6 +17,10 @@ const ERRORS = new Map([
     - Check that the SSH URI is valid.
     - Check that you have enough storage.
     `
+  ],
+  [
+    'BASHRC',
+    `We were unable to update bashrc`
   ]
 ])
 
@@ -99,15 +103,32 @@ class Install {
   async gitClone() {
     try {
       const { stdout, stderr } = await exec(`git clone "${this.remote}" "${this.repoDir}"`)
+      log.debug(stdout)
+      log.info('git clone success.')
       if (stderr === '') {
-        log.info('git clone success.')
-      } else {
-        log.debug('git clone completed with a warning.', stdout)
-        log.warn(stderr)
+        log.debug('git clone:', stderr)
       }
     } catch (e) {
       console.error(e)
       throw new Error(ERRORS.get('CLONE'))
+    }
+  }
+
+  configureBash = async () => {
+    const header = `\n\n# Added by ${NS} #\n`
+    const configForSelf = `alias git="node /sandbox/src/main.mjs"\n`
+    const configForOthers = `alias git="node /sandbox/src/main.mjs"\n`
+    const config = this.isMeta ? configForSelf : configForOthers
+    const bashrcP = `${HOME}/.bashrc`
+    try {
+      const bashrc = await readFile(bashrcP, { encoding: 'utf-8' })
+      if (bashrc.match(header) === null) {
+        await appendFile(bashrcP, header + config)
+        log.info('Successfully patched bashrc.')
+      }
+    } catch(e) {
+      console.error(e)
+      throw new Error(ERRORS.get('BASHRC'))
     }
   }
 
@@ -123,6 +144,8 @@ class Install {
     if (! await this.isRepoValid()) {
       await this.gitClone()
     }
+
+    await this.configureBash()
   }
 }
 

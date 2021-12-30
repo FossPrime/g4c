@@ -678,7 +678,7 @@ responselike@^1.0.2:
   dependencies:
     lowercase-keys "^1.0.0"
 
-rsyncjs@0.0.12:
+rsyncjs@^0.0.12:
   version "0.0.12"
   resolved "https://registry.yarnpkg.com/rsyncjs/-/rsyncjs-0.0.12.tgz#719098cb37ff23aa05ae3d9dbc0328ff4f465acc"
   integrity sha512-4wsleh72AouLaJElNCv/S4+YLuOyOExlGso8jNfHZo2izi8CbX7qrmGVsNN//wNL6Hp9vHNyQt46T07MEkomPA==

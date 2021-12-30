@@ -2,20 +2,21 @@
 
 ## Summary
 
-Aims to seamlessly support the most basic git
-commands via a bash alias in CSB.
+Aims to seamlessly support basic git
+commands via a bash alias in CodeSandbox.
+
+- [Master sandbox](https://codesandbox.io/s/git-4-csb-r3f01?file=/README.md)
+- [Git tracker](https://gitlab.com/vblip/git-4-csb)
 
 ## Commands we will support
 
-Note: To bypass the bash alias and access the real git, use `_git`
+Note: To bypass the bash alias and access the real git, use `\git`
 
-- git add
-- git commit
+- git add .
+- git commit -m "My commit message"
 - git push
 - git pull
 - git status
-
-In addition
 
 - g4c install
   - To be run after install through the package.json "prestart" script. Reads the env vars and modifies the container with a stable private key and a `.bashrc` alias.
@@ -40,24 +41,6 @@ Third, configure the CodeSandbox secret environment variables
 - G4C_RSA (alternatively)
   - same thing, but for RSA
 
-Finally, add `"predev": "g4c i"` under your package.json scripts. Replace prestart with predevelop, preserve or prestart if you do not have a "dev" script.
+Finally, add `"predev": "g4c i || :"` under your package.json scripts. Replace prestart with predevelop, preserve or prestart if you do not have a "dev" script.
 
 "install" scripts **won't work** as we need access to the secrets which are not available at install time, only at final runtime.
-
-## Workflow (OUTDATED DOC)
-
-- Automatically install secrets (ssh, npmrc)
-- Automatically clone repo on install
-- Upon request, rsync repo to /sandbox
-  - Difficult to automate, backups can be deleted wo notice
-- Upon request, rsync changes to repo
-- manually git commit and push
-
-### Git status implementation
-
-1. Uses fetch to check if the cached commit ID matches upstream.
-2. Clones master to tmp and rsync's /sandbox on top of it, then runs git status to see if anything has changed.
-
-### Git push
-
-- last pull or push commit id is saved to .codesandbox/g4c.lock

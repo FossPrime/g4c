@@ -5,10 +5,10 @@
     "name": "Ray Foss",
     "email": "no-g4c@vblip.com"
   },
-  "version": "0.0.1",
+  "version": "0.0.２",
   "license": "GPL-3.0",
   "scripts": {
-    "predev": "env && node src/main.mjs install",
+    "predev": "node src/main.mjs i meta",
     "dev": "nodemon index.mjs"
   },
   "bin": {
@@ -22,7 +22,10 @@
     "nodemon": "^2.0.15"
   },
   "dependencies": {
-    "rsyncjs": "0.0.12"
+    "rsyncjs": "^0.0.12"
   },
-  "keywords": ["codesandbox", "gitlab"]
+  "keywords": [
+    "codesandbox",
+    "gitlab"
+  ]
 }

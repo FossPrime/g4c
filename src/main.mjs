@@ -7,10 +7,9 @@ import { exec as execCb } from 'child_process'
 import { readFile } from 'fs/promises'
 
 // Pseudo-modules
-const log = new Log({ level: 3 })
+const log = new Log({ name: 'main', level: 3 })
 const exec = promisify(execCb)
 
-const finishedMsg = '終了しました。'
 const sandboxP = '/sandbox'
 
 let ncp = 0
@@ -31,7 +30,7 @@ async function gitSync(isPush) {
     exclude,
     async afterEachSync({relativePath}) {
       ncp++
-      // process.stdout.write(`${relativePath}\n`)
+      log.debug(`${relativePath}`)
       process.stdout.write(`.`)
 
       if (ncp > maxFiles) {
@@ -42,7 +41,7 @@ async function gitSync(isPush) {
     }
   })
 
-  console.log('\n' + finishedMsg)
+  process.stdout.write('\n終了しました。\n')
 }
 
 const keygen = async () => {
@@ -51,30 +50,77 @@ const keygen = async () => {
   await exec(genCmd)    
   // Use fsPromises.readFile() method
   // to read the file 
-  console.log('G4C_ED25519:')
+  log.info('G4C_ED25519:')
   const privKey = await readFile(filePath, { encoding: 'utf-8' })
-  console.log(privKey.replaceAll(/\n/g, '$'))
+  log.info(privKey.replaceAll(/\n/g, '$'))
 
-  console.log('\nPublic Key:')
+  log.info('\nPublic Key:')
   const pubKey = await readFile(filePath + '.pub', { encoding: 'utf-8' })
-  console.log(pubKey)
+  log.info(pubKey)
 }
 
-const addToStage = async () => {
+const addToStage = async (args) => {
+  if (args[0] !== '.') {
+    throw new Error('We only support "." as a parameter.')
+  }
+  await gitSync(true)
   const { stdout: addResOut, stderr: addResErr } = await exec(`${PCMD} git add .`)
   log.info('addRes:', addResOut, addResErr)
 }
 
 
-const status = async () => {
+const commit = async (args) => {
+  if (args[0] === '-m' && typeof args[1] === 'string') {
+    const { stdout, stderr } = await exec(`${PCMD} git commit -m "${args[1]}"`)
+    log.info('commit:', stdout, stderr)
+  } else if (args[0] === undefined) {
+    // We chave to pass through a spawn STDIO
+    // I don't have time to look up the code I used in stackblitz right now
+    throw new Error('This feature is coming soon... for now use "-m" as a parameter.')
+  } else {
+    throw new Error('We only support "-m" as a parameter.')
+  }
+}
+
+const push = async (args) => {
+  if (args.length > 0) {
+    throw new Error('We don\'t support any arguments for push.')
+  }
+  const { stdout, stderr } = await exec(`${PCMD} git push`)
+  log.info('statusRes:', stdout, stderr)
+}
+
+const pull = async (args) => {
+  if (args.length > 0) {
+    throw new Error('We don\'t support any arguments for pull.')
+  }
+  await await gitSync(false)
+  const { stdout, stderr } = await exec(`${PCMD} git pull`)
+  log.info('pull:', stdout, stderr)
+}
+
+const gitStatus = async () => {
   const { stdout: statusOut, stderr: statusErr } = await exec(`${PCMD} git status`)
   log.info('statusRes:', statusOut, statusErr)
+}
+
+const status = async (args) => {
+  if (args.length > 0) {
+    throw new Error('We don\'t support any arguments for status.')
+  }
+  const { stdout: statusOut, stderr: statusErr } = await exec(`${PCMD} git status`)
+  log.info('statusRes:', statusOut, statusErr)
+}
+
+const printReadMe = async () => {
+  const readMe = await readFile(doc, { encoding: 'utf-8' })
+  process.stdout.write(readMe)
 }
 
 const main = async () => {
   const command = process.argv[2]
   const args = process.argv.slice(3)
-  log.info('cli arguments:', args)
+  log.debug('cli arguments:', args)
 
   switch (command) {
     case 'keygen':
@@ -84,26 +130,28 @@ const main = async () => {
     case 'install':
       const install = new Install()
       await install.promise
+      process.stdout.write('インストールに成功\n')
       break
     case 'add':
-      await gitSync(true)
       await addToStage(args)
-      await status()
+      await gitStatus()
       break
     case 'commit':
-      log.warn('ERROR: NOT IMPLEMENTED.')
+      await commit(args)
       break
     case 'push':
-      gitSync(true)
+      await push(args)
       break
     case 'pull':
-      gitSync(false)
+      // todo: make a tarball backup first
+      log.warn('This is dangerous.')
+      await pull(args)
       break
     case 'status':
-      log.warn('ERROR: NOT IMPLEMENTED.')
+      await status(args)
       break
     default:
-      log.info('See readme for ussage.')
+      printReadMe()
   }
 }
 main()
