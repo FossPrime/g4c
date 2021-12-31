@@ -1,12 +1,12 @@
-# git-4-csb
+# g4c - Git for CodeSandbox
 
 ## Summary
 
 Aims to seamlessly support basic git
 commands via a bash alias in CodeSandbox.
 
-- [Master sandbox](https://codesandbox.io/s/git-4-csb-r3f01?file=/README.md)
-- [Git tracker](https://gitlab.com/vblip/git-4-csb)
+- [Master sandbox](https://codesandbox.io/s/g4c-git-for-codesandbox-r3f01)
+- [Git tracker](https://gitlab.com/vblip/g4c)
 
 ## Commands we will support
 
@@ -25,9 +25,9 @@ Note: To bypass the bash alias and access the real git, use `\git`
 
 ## Setup
 
-First, `npm i --save-dev git-4-csb`. This will give you access to the g4c command.
+First, `npm i --save-dev g4c`. This will give you access to the g4c command.
 
-Second, generate your ssh-keys with `g4c keygen`
+Second, generate your ssh-keys with `npx g4c keygen`
 
 Third, configure the CodeSandbox secret environment variables
 

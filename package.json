@@ -1,11 +1,12 @@
 {
-  "name": "git-4-csb",
-  "description": "",
+  "name": "g4c",
+  "description": "CodeSandbox basic git commands wrapper.",
+  "repository": "gitlab:vblip/g4c",
   "author": {
     "name": "Ray Foss",
     "email": "no-g4c@vblip.com"
   },
-  "version": "0.0.3",
+  "version": "0.0.6",
   "license": "GPL-3.0",
   "scripts": {
     "predev": "node src/main.mjs i meta",

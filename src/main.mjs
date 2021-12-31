@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import Install from './install.mjs'
 import { HOME, REPO_DIR, PCMD, sleep } from './utils.mjs'
 import Log from './logger.mjs'
@@ -87,7 +88,7 @@ const push = async (args) => {
     throw new Error('We don\'t support any arguments for push.')
   }
   const { stdout, stderr } = await exec(`${PCMD} git push`)
-  log.info('statusRes:', stdout, stderr)
+  log.info(stdout, stderr)
 }
 
 const pull = async (args) => {
@@ -101,19 +102,18 @@ const pull = async (args) => {
 
 const gitStatus = async () => {
   const { stdout: statusOut, stderr: statusErr } = await exec(`${PCMD} git status`)
-  log.info('statusRes:', statusOut, statusErr)
+  log.info('status:', statusOut, statusErr)
 }
 
 const status = async (args) => {
   if (args.length > 0) {
     throw new Error('We don\'t support any arguments for status.')
   }
-  const { stdout: statusOut, stderr: statusErr } = await exec(`${PCMD} git status`)
-  log.info('statusRes:', statusOut, statusErr)
+  await gitStatus()
 }
 
 const printReadMe = async () => {
-  const readMe = await readFile(doc, { encoding: 'utf-8' })
+  const readMe = await readFile('./README.md', { encoding: 'utf-8' })
   process.stdout.write(readMe)
 }
 
