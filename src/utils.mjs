@@ -3,6 +3,7 @@ import { promisify } from 'util'
 import { exec as execCb } from 'child_process'
 
 export const PKG_NAME = 'g4c'
+export const SB = '/sandbox'
 export const HOME = process.env.HOME
 export const REPO_DIR =
   process.env[NS + '_DIR'] || `/tmp/${NS.toLocaleLowerCase()}`

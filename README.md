@@ -44,3 +44,7 @@ Third, configure the CodeSandbox secret environment variables
 Finally, add `"predev": "npx g4c i || :"` under your package.json scripts. Replace prestart with predevelop, preserve or prestart if you do not have a "dev" script.
 
 "install" scripts **won't work** as we need access to the secrets which are not available at install time, only at final runtime.
+
+## Known Issues
+
+Every call to rsyncjs copies all files, even if they are the same or have been copied before. As read calls are cheaper than write ones, one solution is to add support for a checksum function which will compare the file if the destination is younger. Hardlinks are not an option in CSB, as `/sandbox` has it's own device.

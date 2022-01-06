@@ -1,14 +1,14 @@
 import { exec as execCb } from 'child_process'
 import { appendFile, readdir, readFile, mkdir, writeFile } from 'fs/promises'
 import { promisify } from 'util'
-import { PKG_NAME, REPO_DIR, HOME } from './utils.mjs'
+import { PKG_NAME, REPO_DIR, SB, HOME } from './utils.mjs'
 import Log, {NS} from './logger.mjs'
 const log = new Log({name: 'Install', level: 'warn'})
 const exec = promisify(execCb)
 
 const SSHP = `${HOME}/.ssh`
 
-const ERRORS = new Map([
+const E = new Map([
   [
     'CLONE',
     `
@@ -112,14 +112,14 @@ class Install {
       }
     } catch (e) {
       console.error(e)
-      throw new Error(ERRORS.get('CLONE'))
+      throw new Error(E.get('CLONE'))
     }
   }
 
   configureBash = async () => {
     const header = `\n\n# Added by ${NS} #\n`
-    const configForSelf = `alias git="node /sandbox/src/main.mjs"\n`
-    const configForOthers = `alias git="node /sandbox/node_modules/${PKG_NAME}/src/main.mjs"\n`
+    const configForSelf = `alias git="node ${SB}/src/main.mjs"\n`
+    const configForOthers = `alias git="node ${SB}/node_modules/${PKG_NAME}/src/main.mjs"\n`
     const config = this.isMeta ? configForSelf : configForOthers
     const bashrcP = `${HOME}/.bashrc`
     try {
@@ -130,7 +130,7 @@ class Install {
       }
     } catch(e) {
       console.error(e)
-      throw new Error(ERRORS.get('BASHRC'))
+      throw new Error(E.get('BASHRC'))
     }
   }
 

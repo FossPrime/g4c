@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 import Install from './install.mjs'
-import { exec, HOME, REPO_DIR, PCMD, sleep } from './utils.mjs'
+import { exec, SB, HOME, REPO_DIR, PCMD, sleep } from './utils.mjs'
 import Log from './logger.mjs'
 import { readFile } from 'fs/promises'
 
 // Pseudo-modules
 const log = new Log({ name: 'main', level: 3 })
-
-const sandboxP = '/sandbox'
 
 let ncp = 0
 
@@ -17,8 +15,8 @@ async function gitSync(isPush) {
   const commonX = ['node_modules', '.git']
   const pullX = ['package.json', 'zombies', '.vscode', 'yarn.lock', 'package-lock.json']
   const exclude = isPush ? commonX : [...commonX, ...pullX]
-  const source = isPush ? sandboxP : REPO_DIR
-  const destination = isPush ? REPO_DIR : sandboxP  
+  const source = isPush ? SB : REPO_DIR
+  const destination = isPush ? REPO_DIR : SB  
   await exec('yarn add rsyncjs@latest --dev > /dev/null 2>&1')
   const rsync = (await import('rsyncjs')).async
   await sleep(3)
@@ -109,7 +107,7 @@ const status = async (args) => {
 }
 
 const printReadMe = async () => {
-  const readMe = await readFile('./README.md', { encoding: 'utf-8' })
+  const readMe = await readFile(`${SB}/README.md`, { encoding: 'utf-8' })
   process.stdout.write(readMe)
 }
 
