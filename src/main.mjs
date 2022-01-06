@@ -1,15 +1,11 @@
 #!/usr/bin/env node
 import Install from './install.mjs'
-import { HOME, REPO_DIR, PCMD, sleep } from './utils.mjs'
+import { exec, HOME, REPO_DIR, PCMD, sleep } from './utils.mjs'
 import Log from './logger.mjs'
-
-import { promisify } from 'util'
-import { exec as execCb } from 'child_process'
 import { readFile } from 'fs/promises'
 
 // Pseudo-modules
 const log = new Log({ name: 'main', level: 3 })
-const exec = promisify(execCb)
 
 const sandboxP = '/sandbox'
 
