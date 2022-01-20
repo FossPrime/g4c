@@ -48,3 +48,10 @@ Finally, add `"predev": "npx g4c i || :"` under your package.json scripts. Repla
 ## Known Issues
 
 Every call to rsyncjs copies all files, even if they are the same or have been copied before. As read calls are cheaper than write ones, one solution is to add support for a checksum function which will compare the file if the destination is younger. Hardlinks are not an option in CSB, as `/sandbox` has it's own device.
+
+```
+# How does git find changes?
+Indexing. For every tracked file, Git records information such as its size, creation time and last modification time in a file known as the index. To determine whether a file has changed, Git compares its current stats with those cached in the index. If they match, then Git can skip reading the file again.
+```
+
+CodeSandbox it's self uses a similar strategy, because of it, the git clone files and the sandbox directory will have very similar mtime/ctime.

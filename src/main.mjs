@@ -3,8 +3,10 @@ import Install from './install.mjs'
 import { exec, SB, HOME, REPO_DIR, PCMD, sleep } from './utils.mjs'
 import Log from './logger.mjs'
 import { readFile } from 'fs/promises'
+import { URL } from 'url'; // in Browser, the URL in native accessible on window
 
 // Pseudo-modules
+const pkgDir = new URL('..', import.meta.url).pathname
 const log = new Log({ name: 'main', level: 3 })
 
 let ncp = 0
@@ -13,7 +15,7 @@ async function gitSync(isPush) {
   const maxFiles = isPush ? 999 : 45
   const sleepMax = isPush ? 0.001 : 5
   const commonX = ['node_modules', '.git']
-  const pullX = ['package.json', 'zombies', '.vscode', 'yarn.lock', 'package-lock.json']
+  const pullX = ['yarn.lock', 'package-lock.json']
   const exclude = isPush ? commonX : [...commonX, ...pullX]
   const source = isPush ? SB : REPO_DIR
   const destination = isPush ? REPO_DIR : SB  
@@ -107,7 +109,7 @@ const status = async (args) => {
 }
 
 const printReadMe = async () => {
-  const readMe = await readFile(`${SB}/README.md`, { encoding: 'utf-8' })
+  const readMe = await readFile(`${pkgDir}README.md`, { encoding: 'utf-8' })
   process.stdout.write(readMe)
 }
 
