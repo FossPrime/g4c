@@ -47,6 +47,12 @@ Finally, add `"predev": "npx g4c i || :"` under your package.json scripts. Repla
 
 ## Known Issues
 
+- Binaries like PNGs are problematic
+- Delete orphans is not enabled, so stray files may be present in working temp dir.
+- `npx -y g4c i` should install latest if not found
+
+Also,
+
 Every call to rsyncjs copies all files, even if they are the same or have been copied before. As read calls are cheaper than write ones, one solution is to add support for a checksum function which will compare the file if the destination is younger. Hardlinks are not an option in CSB, as `/sandbox` has it's own device.
 
 ```

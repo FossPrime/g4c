@@ -23,7 +23,7 @@ async function gitSync(isPush) {
   const rsync = (await import('rsyncjs')).async
   await sleep(3)
   await rsync(source, destination, {
-    deleteOrphaned: false,
+    deleteOrphaned: true,
     exclude,
     async afterEachSync({relativePath}) {
       ncp++
