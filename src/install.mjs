@@ -36,8 +36,28 @@ class Install {
     this.isMeta = args[0] === 'meta'
     this.promise = this.main()
     log.debug(this)
-
+    this.preFlightChecks()
     return this
+  }
+
+  preFlightChecks() {
+    let kill = false
+    if (this.remote === undefined) {
+      console.error('Please configure the G4C_REMOTE secret')
+      kill = true
+    }
+    if (this.email === undefined) {
+      console.warn('Please configure the G4C_EMAIL secret')
+      this.email = 'john.doe@example.org' // for pull only scenarios
+    }
+    if (this.ed25519Key === undefined && this.rsaKey === undefined) {
+      console.error('Please configure the G4C_ED25519 or G4C_RSA secret')
+      kill = true
+    }
+
+    if (kill) {
+      process.exit(1)
+    }
   }
 
   async gitConfig() {

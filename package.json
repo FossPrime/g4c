@@ -6,7 +6,7 @@
     "name": "Ray Foss",
     "email": "no-g4c@vblip.com"
   },
-  "version": "0.0.8",
+  "version": "0.0.10",
   "license": "GPL-3.0",
   "scripts": {
     "predev": "node src/main.mjs i meta",

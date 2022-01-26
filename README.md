@@ -25,7 +25,7 @@ Note: To bypass the bash alias and access the real git, use `\git`
 
 ## Setup
 
-First, `npm i --save-dev g4c`. This will give you access to the g4c command.
+First, `yarn add --dev g4c`. This will give you access to the g4c command.
 
 Second, generate your ssh-keys with `npx g4c keygen`
 
@@ -41,14 +41,13 @@ Third, configure the CodeSandbox secret environment variables
 - G4C_RSA (alternatively)
   - same thing, but for RSA
 
-Finally, add `"predev": "npx g4c i || :"` under your package.json scripts. Replace prestart with predevelop, preserve or prestart if you do not have a "dev" script.
+Finally, add `"predev": "npx -y g4c i || :"` under your package.json scripts. Replace prestart with predevelop, preserve or prestart if you do not have a "dev" script.
 
 "install" scripts **won't work** as we need access to the secrets which are not available at install time, only at final runtime.
 
 ## Known Issues
 
-- Binaries like PNGs are problematic
-- Delete orphans is not enabled, so stray files may be present in working temp dir.
+- Binaries like PNGs are problematic. They are modified by CSB every time they are written, so keeping the exact same binary in git as in CSB is impossible. It may be possible to hide this issue by handling exif data.
 - `npx -y g4c i` should install latest if not found
 
 Also,
