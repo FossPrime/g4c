@@ -34,9 +34,10 @@ class Install {
     this.rsaKey = process.env[NS + '_RSA']
     this.keyName = this.ed25519Key ? 'id_ed25519' : 'id_rsa'
     this.isMeta = args[0] === 'meta'
-    this.promise = this.main()
+
     log.debug(this)
     this.preFlightChecks()
+    this.promise = this.main()
     return this
   }
 
