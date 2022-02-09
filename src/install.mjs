@@ -51,7 +51,7 @@ class Install {
       console.warn('Please configure the G4C_EMAIL secret')
       this.email = 'john.doe@example.org' // for pull only scenarios
     }
-    if (this.ed25519Key === undefined && this.rsaKey === undefined) {
+    if (!(this.ed25519Key || this.rsaKey)) {
       console.error('Please configure the G4C_ED25519 or G4C_RSA secret')
       kill = true
     }
