@@ -1,0 +1,4 @@
+/node_modules/
+
+# This is not strictly neccesary for private dependents...
+/SECRETS.*.json

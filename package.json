@@ -1,13 +1,17 @@
 {
   "name": "g4c",
-  "description": "CodeSandbox basic git commands wrapper.",
-  "repository": "gitlab:vblip/g4c",
+  "description": "A basic pure js git CLI implementation based on isomorphic-git.",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/vblip/g4c.git"
+  },
   "author": {
     "name": "Ray Foss",
     "email": "no-g4c@vblip.com"
   },
-  "version": "0.0.12",
+  "version": "1.0.0-alpha.1",
   "license": "GPL-3.0",
+  "type": "module",
   "scripts": {
     "predev": "node src/main.mjs i meta",
     "dev": "nodemon index.mjs"
@@ -28,5 +32,10 @@
   "keywords": [
     "codesandbox",
     "gitlab"
-  ]
+  ],
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "none"
+  }
 }
