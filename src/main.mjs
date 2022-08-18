@@ -1,72 +1,52 @@
 #!/usr/bin/env node
 import Install from './install.mjs'
-import { exec, SB, HOME, REPO_DIR, PCMD, sleep } from './utils.mjs'
+import { exec, getConfig, PCMD, sleep } from './utils.mjs'
 import Log from './logger.mjs'
-import { readFile } from 'fs/promises'
-import { URL } from 'url'; // in Browser, the URL in native accessible on window
+import { readFile } from 'node:fs/promises'
+import { URL } from 'node:url'; // in Browser, the URL in native accessible on window
+import {
+  fetch,
+  clone,
+  fastForward,
+  currentBranch,
+  add,
+  commit,
+  push,
+  statusMatrix
+} from 'isomorphic-git'
+import { default as isomorphicGitFsClient } from 'node:fs'
+import path from 'node:path'
+
+// HARD CONFIG
+const PUSH = true
+const CHECKOUT = false // DANGER: true WILL overrite your SB code
+const FETCH = true // BUG: Overwrites any unpushed commits when true
+const NS = 'git'
+const GIT_COMMIT_MESSAGE = 'StackBlitz Commit.'
+
+
+const isomorphicGitHttpClient = await import(
+  '../node_modules/isomorphic-git/http/node/index.js'
+)
+const isomorphicGitWorkingTreeDir = './'
+
+const config = await getConfig()
 
 // Pseudo-modules
 const pkgDir = new URL('..', import.meta.url).pathname
 const log = new Log({ name: 'main', level: 3 })
 
-let ncp = 0
-
-async function gitSync(isPush) {
-  const maxFiles = isPush ? 999 : 45
-  const sleepMax = isPush ? 0.001 : 5
-  const commonX = ['node_modules', '.git']
-  const pullX = ['yarn.lock', 'package-lock.json']
-  const exclude = isPush ? commonX : [...commonX, ...pullX]
-  const source = isPush ? SB : REPO_DIR
-  const destination = isPush ? REPO_DIR : SB  
-  await exec('yarn add rsyncjs@latest --dev > /dev/null 2>&1')
-  const rsync = (await import('rsyncjs')).async
-  await sleep(3)
-  await rsync(source, destination, {
-    deleteOrphaned: true,
-    exclude,
-    async afterEachSync({relativePath}) {
-      ncp++
-      log.debug(`${relativePath}`)
-      process.stdout.write(`.`)
-
-      if (ncp > maxFiles) {
-        process.stdout.write(`\nTaking a ${sleepMax} second break\n`)
-        await sleep(sleepMax)
-        ncp = 0
-      }
-    }
-  })
-
-  process.stdout.write('\n終了しました。\n')
-}
-
-const keygen = async () => {
-  const filePath = `${HOME}/.ssh/id_ed25519`
-  const genCmd = `ssh-keygen -N "" -t ed25519 -f "${filePath}"`
-  await exec(genCmd)    
-  // Use fsPromises.readFile() method
-  // to read the file 
-  log.info('G4C_ED25519:')
-  const privKey = await readFile(filePath, { encoding: 'utf-8' })
-  log.info(privKey.replaceAll(/\n/g, '$'))
-
-  log.info('\nPublic Key:')
-  const pubKey = await readFile(filePath + '.pub', { encoding: 'utf-8' })
-  log.info(pubKey)
-}
-
 const addToStage = async (args) => {
   if (args[0] !== '.') {
     throw new Error('We only support "." as a parameter.')
   }
-  await gitSync(true)
+  // DELETE: await gitSync(true)
   const { stdout: addResOut, stderr: addResErr } = await exec(`${PCMD} git add .`)
   log.info('addRes:', addResOut, addResErr)
 }
 
 
-const commit = async (args) => {
+const g4cCommit = async (args) => {
   if (args[0] === '-m' && typeof args[1] === 'string') {
     const { stdout, stderr } = await exec(`${PCMD} git commit -m "${args[1]}"`)
     log.info('commit:', stdout, stderr)
@@ -79,7 +59,7 @@ const commit = async (args) => {
   }
 }
 
-const push = async (args) => {
+const g4cPush = async (args) => {
   if (args.length > 0) {
     throw new Error('We don\'t support any arguments for push.')
   }
@@ -87,25 +67,77 @@ const push = async (args) => {
   log.info(stdout, stderr)
 }
 
-const pull = async (args) => {
+
+const gitUrl = new URL(config.repoUrl)
+if (config.username) {
+  gitUrl.username = config.username
+  gitUrl.password = config.password
+}
+const isomorphicGitUrl = gitUrl.toString()
+// const workdir = tmpdir() + '/' + NS
+const gitConfig = {
+  fs: isomorphicGitFsClient,
+  dir: isomorphicGitWorkingTreeDir,
+  cache: {}
+}
+const gitRemoteConfig = {
+  http: isomorphicGitHttpClient,
+  corsProxy: config.proxy,
+  url: isomorphicGitUrl
+}
+const g4cClone = async () => {
+  await clone({
+    ...gitConfig,
+    ...gitRemoteConfig,
+    singleBranch: true,
+    noCheckout: !CHECKOUT,
+    depth: 1
+  })
+}
+
+const g4cPull = async (args) => {
   if (args.length > 0) {
     throw new Error('We don\'t support any arguments for pull.')
   }
-  await await gitSync(false)
-  const { stdout, stderr } = await exec(`${PCMD} git pull`)
-  log.info('pull:', stdout, stderr)
+  const params = {
+    ...gitConfig,
+    ...gitRemoteConfig,
+    singleBranch: true
+    // corsProxy: proxy, we don't need this as it's saved in repo config.
+  }
+  if (CHECKOUT) {
+    await fastForward(params)
+  } else if (FETCH) {
+    await fetch(params)
+  } else {
+    throw new Error(
+      `${NS}: FastForward failed. Nither fetch, nor checkout are enabled.`
+    )
+  }
 }
 
-const gitStatus = async () => {
-  const { stdout: statusOut, stderr: statusErr } = await exec(`${PCMD} git status`)
-  log.info('status:', statusOut, statusErr)
+const g4cCurrentBranch = async () => {
+  try {
+    const branch = await currentBranch({
+      ...gitConfig,
+      fullname: false
+    })
+    return branch
+  } catch (e) {
+    if (e.code === 'NotFoundError') {
+      return ''
+    } else {
+      throw e
+    }
+  }
 }
 
-const status = async (args) => {
+
+const g4cStatus = async (args) => {
   if (args.length > 0) {
     throw new Error('We don\'t support any arguments for status.')
   }
-  await gitStatus()
+  await g4cStatus()
 }
 
 const printReadMe = async () => {
@@ -119,10 +151,7 @@ const main = async () => {
   log.debug('cli arguments:', args)
 
   switch (command) {
-    case 'keygen':
-      keygen()
-      break
-    case 'i':
+    case 'i': // DELETE ME... This doesnt do anything anymore, i think
     case 'install':
       const install = new Install(args)
       await install.promise
@@ -130,21 +159,21 @@ const main = async () => {
       break
     case 'add':
       await addToStage(args)
-      await gitStatus()
+      await g4cStatus()
       break
     case 'commit':
-      await commit(args)
+      await g4cCommit(args)
       break
     case 'push':
-      await push(args)
+      await g4cPush(args)
       break
     case 'pull':
       // todo: make a tarball backup first
       log.warn('This is dangerous.')
-      await pull(args)
+      await g4cPull(args)
       break
     case 'status':
-      await status(args)
+      await g4cStatus(args)
       break
     default:
       printReadMe()

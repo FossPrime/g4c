@@ -2,3 +2,6 @@
 
 # This is not strictly neccesary for private dependents...
 /SECRETS.*.json
+
+# DX aid
+/temp.js

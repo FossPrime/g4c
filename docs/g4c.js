@@ -1,58 +1,8 @@
 // Prototype pure-js implementation
 // git.mjs -- push all changes to Git
 // Usage: `node git.mjs`
-import {
-    fetch,
-    clone,
-    fastForward,
-    currentBranch,
-    add,
-    commit,
-    push,
-    statusMatrix
-  } from 'isomorphic-git'
-  import { default as isomorphicGitFsClient } from 'node:fs'
-  import path from 'node:path'
-  import { readFile } from 'node:fs/promises'
-  import { URL } from 'node:url'
+
   
-  // HARD CONFIG
-  const PUSH = true
-  const CHECKOUT = false // DANGER: true WILL overrite your SB code
-  const FETCH = true // BUG: Overwrites any unpushed commits when true
-  const NS = 'git'
-  const UTMS = Date.now()
-  const SECRETS_FILE_PATH = 'SECRETS.g4c.json'
-  const GIT_COMMIT_MESSAGE = 'StackBlitz Commit.'
-  
-  const { g4c } = JSON.parse(
-    await readFile('package.json', {
-      encoding: 'utf-8'
-    })
-  )
-  
-  const { proxy, repoUrl, username, password, author, email } = Object.assign(
-    JSON.parse(
-      await readFile(SECRETS_FILE_PATH, {
-        encoding: 'utf-8'
-      })
-    ),
-    g4c
-  )
-  
-  const isomorphicGitHttpClient = await import(
-    './node_modules/isomorphic-git/http/node/index.js'
-  )
-  const isomorphicGitWorkingTreeDir = './'
-  const PROJ = path.basename(path.resolve('.'))
-  if (
-    path.resolve('/home/projects/' + PROJ) !==
-    path.resolve(isomorphicGitWorkingTreeDir)
-  ) {
-    throw new Error(
-      `${NS}: Current working directory is not a stackblitz project!`
-    )
-  }
   
   const gitUrl = new URL(repoUrl)
   if (username) {

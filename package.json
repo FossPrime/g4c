@@ -27,6 +27,7 @@
     "nodemon": "^2.0.15"
   },
   "dependencies": {
+    "isomorphic-git": "^1.19.2",
     "rsyncjs": "^0.0.12"
   },
   "keywords": [
