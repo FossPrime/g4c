@@ -12,16 +12,18 @@ commands via a bash alias in CodeSandbox.
 
 Note: To bypass the bash alias and access the real git, use `\git`
 
-- git add .
-- git commit -m "My commit message"
-- git push
-- git pull
-- git status
+- g4c checkout // done
+- g4c checkout --force // done
+- g4c pull // done
+- g4c pull --ff-only // done
 
-- g4c install
-  - To be run after install through the package.json "prestart" script. Reads the env vars and modifies the container with a stable private key and a `.bashrc` alias.
-- g4c keygen
-  - Runs ssh-keygen and escapes the new lines for use in G4C_ED25519
+**TODO:**
+
+- g4c add --all
+- g4c commit -m "My commit message"
+- g4c push
+- g4c status
+- git baremetal passthrough
 
 ## Setup
 

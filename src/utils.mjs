@@ -40,12 +40,12 @@ const configCache = {}
 export const getConfig = async () => {
   if (configCache.type === PKG_NAME) {
     return configCache
-  }
+  } 
 
   const packageJson = {}
   try {
     const rawString = await readFile('package.json', {
-      encoding: 'utf-8'
+      encoding: 'utf-8' 
     })
     Object.assign(packageJson, JSON.parse(rawString))
   } catch(_e) {}
@@ -60,8 +60,10 @@ export const getConfig = async () => {
   } catch(_e) {}
 
   const defaultConfig = {
-    type: PKG_NAME,
-    ignoreProxyOnBareMetal: true // TODO: Implement this
+    type: PKG_NAME, 
+    ignoreProxyOnBareMetal: true, // TODO: Implement this
+    author: 'John Doe',
+    email: 'git@example.com'
   }
   if (packageJson?.repository?.type === 'git') {
     defaultConfig.repoUrl = packageJson.repository.url
@@ -70,9 +72,13 @@ export const getConfig = async () => {
     defaultConfig.proxy = DEFAULT_PROXY
   }
 
-  Object.assign(configCache, defaultConfig, packageG4c, secretsFile)
+  const result = {}
+  Object.assign(result, defaultConfig, packageG4c, secretsFile)
 
-  return configCache
+  if (result.ignoreProxyOnBareMetal === true) {
+    result.proxy = undefined
+  }
+  return result
 }
 
 

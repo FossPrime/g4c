@@ -7,19 +7,21 @@ import { URL } from 'node:url'; // in Browser, the URL in native accessible on w
 import {
   fetch,
   clone,
+  pull,
   fastForward,
   currentBranch,
   add,
   commit,
   push,
-  statusMatrix
+  statusMatrix,
+  checkout
 } from 'isomorphic-git'
 import { default as isomorphicGitFsClient } from 'node:fs'
 import path from 'node:path'
 
 // HARD CONFIG
 const PUSH = true
-const CHECKOUT = false // DANGER: true WILL overrite your SB code
+const CHECKOUT = true // DANGER: true WILL overrite your SB code
 const FETCH = true // BUG: Overwrites any unpushed commits when true
 const NS = 'git'
 const GIT_COMMIT_MESSAGE = 'StackBlitz Commit.'
@@ -34,7 +36,7 @@ const config = await getConfig()
 
 // Pseudo-modules
 const pkgDir = new URL('..', import.meta.url).pathname
-const log = new Log({ name: 'main', level: 3 })
+const log = new Log({ name: 'main', level: 'info' })
 
 const addToStage = async (args) => {
   if (args[0] !== '.') {
@@ -44,7 +46,6 @@ const addToStage = async (args) => {
   const { stdout: addResOut, stderr: addResErr } = await exec(`${PCMD} git add .`)
   log.info('addRes:', addResOut, addResErr)
 }
-
 
 const g4cCommit = async (args) => {
   if (args[0] === '-m' && typeof args[1] === 'string') {
@@ -65,7 +66,7 @@ const g4cPush = async (args) => {
   }
   const { stdout, stderr } = await exec(`${PCMD} git push`)
   log.info(stdout, stderr)
-}
+} 
 
 
 const gitUrl = new URL(config.repoUrl)
@@ -83,36 +84,72 @@ const gitConfig = {
 const gitRemoteConfig = {
   http: isomorphicGitHttpClient,
   corsProxy: config.proxy,
-  url: isomorphicGitUrl
+  url: isomorphicGitUrl,
+  author: { // for commits and hard pull
+    name: config.author,
+    email: config.email
+  }
 }
+
 const g4cClone = async () => {
+  log.info(`${NS}: Running clone.`)
+  // TODO: support changing url
   await clone({
     ...gitConfig,
     ...gitRemoteConfig,
     singleBranch: true,
-    noCheckout: !CHECKOUT,
+    noCheckout: true,
     depth: 1
   })
 }
 
 const g4cPull = async (args) => {
-  if (args.length > 0) {
+  const sm = {
+    fastForwardOnly: false
+  }
+  if (args.length === 1 && args[0] === '--ff-only') {
+    sm.fastForwardOnly = true
+  } else if (args.length !== 0) {
     throw new Error('We don\'t support any arguments for pull.')
   }
+
   const params = {
-    ...gitConfig,
+    ...gitConfig, 
     ...gitRemoteConfig,
-    singleBranch: true
+    singleBranch: true,
+    ...sm
+  }
+
+  log.info(`${NS}: Running pull.`)
+  await pull(params)
+
+}
+
+const g4cCheckout = async (args) => {
+  const sm = {
+    FORCE: false // similar to checkout --force
+  }
+  if (args.length === 2 && args[0] === '--force'  && args[1] === 'HEAD') {
+    sm.FORCE = true 
+  } else if (args.length === 1 && args[0] === 'HEAD') {
+    sm.FORCE = false
+  } else {
+    throw new Error('We only support --force HEAD as an argument.')
+  }
+
+  const params = {
+    ...gitConfig, 
+    ...gitRemoteConfig,
+    singleBranch: true, 
     // corsProxy: proxy, we don't need this as it's saved in repo config.
   }
-  if (CHECKOUT) {
-    await fastForward(params)
-  } else if (FETCH) {
-    await fetch(params)
+
+  if (sm.FORCE) { // may create a merge commit
+    log.warn(`${NS}: Running FORCE checkout.`) 
+    await checkout(Object.assign({},params,{ force: true }))
   } else {
-    throw new Error(
-      `${NS}: FastForward failed. Nither fetch, nor checkout are enabled.`
-    )
+    log.info(`${NS}: Running checkout.`)
+    await checkout(params)
   }
 }
 
@@ -150,12 +187,18 @@ const main = async () => {
   const args = process.argv.slice(3)
   log.debug('cli arguments:', args)
 
+  const currentBranch = await g4cCurrentBranch()
+  if (currentBranch === '') {
+    log.info('Initiatting...')
+    await g4cClone()
+  }
+
   switch (command) {
-    case 'i': // DELETE ME... This doesnt do anything anymore, i think
-    case 'install':
-      const install = new Install(args)
-      await install.promise
-      process.stdout.write('インストールに成功\n')
+    case 'checkout':
+      await g4cCheckout(args)
+      break
+    case 'pull':
+      await g4cPull(args)
       break
     case 'add':
       await addToStage(args)
@@ -166,11 +209,6 @@ const main = async () => {
       break
     case 'push':
       await g4cPush(args)
-      break
-    case 'pull':
-      // todo: make a tarball backup first
-      log.warn('This is dangerous.')
-      await g4cPull(args)
       break
     case 'status':
       await g4cStatus(args)
