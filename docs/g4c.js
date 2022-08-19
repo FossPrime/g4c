@@ -66,27 +66,6 @@
   }
   
   
-  const gitCommit = async (message) => {
-    const sha = await commit({
-      ...gitConfig,
-      author: {
-        name: author,
-        email: email
-      },
-      message
-    })
-    return sha
-  }
-  
-  const gitPush = async () => {
-    const pushResult = await push({
-      ...gitConfig,
-      ...gitRemoteConfig,
-      // remote: 'origin' // probably unnecesary
-    })
-    return pushResult
-  }
-  
   const main = async () => {
     const currentBranch = await gitCurrentBranch()
     if (currentBranch === '') {

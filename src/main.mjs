@@ -74,20 +74,25 @@ const g4cCommit = async (args) => {
   const sha = await commit({
     ...gitConfig,
     author: gitRemoteConfig.author,
-    message
+    ...sm
   })
 
-  console.log(`Commit success, SHA: ${sha}`)
+  log.info(`Commit success, SHA: ${sha}`)
   return sha
-
 }
 
 const g4cPush = async (args) => {
   if (args.length > 0) {
     throw new Error('We don\'t support any arguments for push.')
   }
-  const { stdout, stderr } = await exec(`${PCMD} git push`)
-  log.info(stdout, stderr)
+  const pushResult = await push({
+    ...gitConfig,
+    ...gitRemoteConfig,
+    // remote: 'origin' // probably unnecesary
+  })
+  log.info('Push successful.')
+  
+  return pushResult
 } 
 
 
