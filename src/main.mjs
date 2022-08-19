@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import Install from './install.mjs'
 import { exec, getConfig, PCMD, SECRETS_PFX, HEAD_STATUS, WORKDIR_STATUS, prettifyMatrix } from './utils.mjs'
 import Log from './logger.mjs'
 import { readFile } from 'node:fs/promises'
@@ -16,6 +15,7 @@ import {
   statusMatrix,
   checkout
 } from 'isomorphic-git'
+import isomorphicGitHttpClient from 'isomorphic-git/http/node/index.js'
 import { default as isomorphicGitFsClient } from 'node:fs'
 import path from 'node:path'
 
@@ -27,9 +27,7 @@ const NS = 'git'
 const GIT_COMMIT_MESSAGE = 'StackBlitz Commit.'
 
 
-const isomorphicGitHttpClient = await import(
-  '../node_modules/isomorphic-git/http/node/index.js'
-)
+// const isomorphicGitHttpClient = await import('isomorphic-git/http/node/index.js')
 const isomorphicGitWorkingTreeDir = './'
 
 const config = await getConfig()

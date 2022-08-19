@@ -40,7 +40,8 @@ All of these are optional:
   "username": "inu",
   "password": "neko",
   "authorName": "John Doe",
-  "authorEmail": "john@example.com"
+  "authorEmail": "john@example.com",
+  "repoUrl": "https://github-sucks.com/user/project.git"
 }
 ```
 
