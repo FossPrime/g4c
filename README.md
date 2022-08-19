@@ -1,4 +1,4 @@
-# g4c - Git for CodeSandbox
+# g4c - Git for Cloud 
 
 A basic pure js git CLI implementation based on isomorphic-git.
 
