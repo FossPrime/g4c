@@ -62,23 +62,23 @@ export const getConfig = async () => {
 
   const defaultConfig = {
     type: PKG_NAME, 
-    ignoreProxyOnBareMetal: true, // TODO: Implement this
+    useProxyOnBareMetal: false, // TODO: Implement this
     authorName: 'John Doe',
     authorEmail: 'git@example.com'
   }
   if (packageJson?.repository?.type === 'git') {
     defaultConfig.repoUrl = packageJson.repository.url
   }
-  if (isStackBlitz) {
-    defaultConfig.proxy = DEFAULT_PROXY
-  }
 
   const result = {}
   Object.assign(result, defaultConfig, packageG4c, secretsFile)
 
-  if (result.ignoreProxyOnBareMetal === true) {
+  if (isStackBlitz || result.useProxyOnBareMetal === true) {
+    result.proxy = result.proxy || DEFAULT_PROXY
+  } else {
     result.proxy = undefined
   }
+
   return result
 }
 

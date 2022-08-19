@@ -20,12 +20,7 @@ import { default as isomorphicGitFsClient } from 'node:fs'
 import path from 'node:path'
 
 // HARD CONFIG
-const PUSH = true
-const CHECKOUT = true // DANGER: true WILL overrite your SB code
-const FETCH = true // BUG: Overwrites any unpushed commits when true
-const NS = 'git'
-const GIT_COMMIT_MESSAGE = 'StackBlitz Commit.'
-
+const NS = 'main'
 
 // const isomorphicGitHttpClient = await import('isomorphic-git/http/node/index.js')
 const isomorphicGitWorkingTreeDir = './'
@@ -34,7 +29,7 @@ const config = await getConfig()
 
 // Pseudo-modules
 const pkgDir = new URL('..', import.meta.url).pathname
-const log = new Log({ name: 'main', level: 'info' })
+const log = new Log({ name: NS, level: 'info' })
 
 
 const gitUrl = new URL(config.repoUrl)
