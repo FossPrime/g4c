@@ -4,12 +4,11 @@ import Log from './logger.mjs'
 import { readFile } from 'node:fs/promises'
 import { URL } from 'node:url'; // in Browser, the URL in native accessible on window
 import {
-  fetch,
   clone,
   pull,
-  fastForward,
   currentBranch,
   add,
+  remove,
   commit,
   push,
   statusMatrix,
@@ -17,7 +16,6 @@ import {
 } from 'isomorphic-git'
 import isomorphicGitHttpClient from 'isomorphic-git/http/node/index.js'
 import { default as isomorphicGitFsClient } from 'node:fs'
-import path from 'node:path'
 
 // HARD CONFIG
 const NS = 'main'
@@ -89,15 +87,22 @@ const g4cPush = async (args) => {
 } 
 
 
-const g4cClone = async () => {
-  log.info(`${NS}: Running clone.`)
+const g4cClone = async (args, { init = false } = {}) => {
+  const sm = {
+    noCheckout: false
+  }
+  if (init === true) {
+    log.info('Initializing...')
+    sm.noCheckout = true
+  }
+  // log.info(`${NS}: Running clone.`)
   // TODO: support changing url
   await clone({
     ...gitConfig,
     ...gitRemoteConfig,
     singleBranch: true,
-    noCheckout: true,
-    depth: 1
+    depth: 1,
+    ...sm
   })
 }
 
@@ -197,12 +202,12 @@ const g4cAdd = async (args) => {
     other: []
   }
   for (const status of matrix) {
-    const [filePath, headStatus, workdirStatus, stageStatus] = status
+    const [filepath, headStatus, workdirStatus, stageStatus] = status
     if (workdirStatus === WORKDIR_STATUS.get('different_from_head')) {
-      result.added.push(filePath)
+      result.added.push(filepath)
       add({
         ...gitConfig,
-        filepath: filePath
+        filepath: filepath
       })
     } else if (
       headStatus === HEAD_STATUS.get('present') &&
@@ -212,14 +217,14 @@ const g4cAdd = async (args) => {
       add({
         // isomorphic-git's commit function will delete anything not in stage
         ...gitConfig,
-        filepath: filePath
+        filepath: filepath
       })
     } else if (
       headStatus === HEAD_STATUS.get('present') &&
       workdirStatus === WORKDIR_STATUS.get('absent')
     ) {
-      // remove not neccessary due to isomorphic-git quirk
-      result.removed.push(filePath)
+      result.removed.push(filepath)
+      await remove({ ...gitConfig, filepath })
     } else {
       result.other.push(status)
     }
@@ -247,8 +252,7 @@ const main = async () => {
 
   const currentBranch = await g4cCurrentBranch()
   if (currentBranch === '') {
-    log.info('Initiatting...')
-    await g4cClone()
+    await g4cClone(args, { init: true })
   }
 
   switch (command) {

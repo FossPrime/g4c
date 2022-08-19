@@ -104,11 +104,11 @@ STATUS_MAPS.forEach(makeMapReversible)
 export {HEAD_STATUS, WORKDIR_STATUS, STAGE_STATUS}
 
 export const prettifyMatrix = (matrix) => matrix.map(
-  ([filePath, headStatus, workdirStatus, stageStatus]) =>
+  ([filepath, headStatus, workdirStatus, stageStatus]) =>
     [headStatus, workdirStatus, stageStatus].every(e => e === 1)
       ? null
       : {
-        filePath,
+        filepath,
         headStatus: HEAD_STATUS.get(headStatus),
         workdirStatus: WORKDIR_STATUS.get(workdirStatus),
         stageStatus: STAGE_STATUS.get(stageStatus)

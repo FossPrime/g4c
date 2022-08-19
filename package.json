@@ -10,7 +10,7 @@
     "name": "Ray Foss",
     "email": "no-g4c@vblip.com"
   },
-  "version": "1.0.3",
+  "version": "1.0.4",
   "license": "GPL-3.0",
   "scripts": {
     "dev": "node index.mjs"
