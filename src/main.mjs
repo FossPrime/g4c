@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import Install from './install.mjs'
-import { exec, getConfig, PCMD, sleep } from './utils.mjs'
+import { exec, getConfig, PCMD, SECRETS_PFX, HEAD_STATUS, WORKDIR_STATUS, prettifyMatrix } from './utils.mjs'
 import Log from './logger.mjs'
 import { readFile } from 'node:fs/promises'
 import { URL } from 'node:url'; // in Browser, the URL in native accessible on window
@@ -38,36 +38,6 @@ const config = await getConfig()
 const pkgDir = new URL('..', import.meta.url).pathname
 const log = new Log({ name: 'main', level: 'info' })
 
-const addToStage = async (args) => {
-  if (args[0] !== '.') {
-    throw new Error('We only support "." as a parameter.')
-  }
-  // DELETE: await gitSync(true)
-  const { stdout: addResOut, stderr: addResErr } = await exec(`${PCMD} git add .`)
-  log.info('addRes:', addResOut, addResErr)
-}
-
-const g4cCommit = async (args) => {
-  if (args[0] === '-m' && typeof args[1] === 'string') {
-    const { stdout, stderr } = await exec(`${PCMD} git commit -m "${args[1]}"`)
-    log.info('commit:', stdout, stderr)
-  } else if (args[0] === undefined) {
-    // We chave to pass through a spawn STDIO
-    // I don't have time to look up the code I used in stackblitz right now
-    throw new Error('This feature is coming soon... for now use "-m" as a parameter.')
-  } else {
-    throw new Error('We only support "-m" as a parameter.')
-  }
-}
-
-const g4cPush = async (args) => {
-  if (args.length > 0) {
-    throw new Error('We don\'t support any arguments for push.')
-  }
-  const { stdout, stderr } = await exec(`${PCMD} git push`)
-  log.info(stdout, stderr)
-} 
-
 
 const gitUrl = new URL(config.repoUrl)
 if (config.username) {
@@ -86,10 +56,40 @@ const gitRemoteConfig = {
   corsProxy: config.proxy,
   url: isomorphicGitUrl,
   author: { // for commits and hard pull
-    name: config.author,
-    email: config.email
+    name: config.authorName,
+    email: config.authorEmail
   }
 }
+
+const g4cCommit = async (args) => {
+  const sm = {
+    message: null
+  }
+  if (args[0] === '-m' && typeof args[1] === 'string') {
+    sm.message = args[1]
+  } else {
+    throw new Error('We only support "-m" as a parameter.')
+  }
+
+  const sha = await commit({
+    ...gitConfig,
+    author: gitRemoteConfig.author,
+    message
+  })
+
+  console.log(`Commit success, SHA: ${sha}`)
+  return sha
+
+}
+
+const g4cPush = async (args) => {
+  if (args.length > 0) {
+    throw new Error('We don\'t support any arguments for push.')
+  }
+  const { stdout, stderr } = await exec(`${PCMD} git push`)
+  log.info(stdout, stderr)
+} 
+
 
 const g4cClone = async () => {
   log.info(`${NS}: Running clone.`)
@@ -170,11 +170,71 @@ const g4cCurrentBranch = async () => {
 }
 
 
-const g4cStatus = async (args) => {
+const g4cStatus = async (args, { human = false } = {}) => {
   if (args.length > 0) {
     throw new Error('We don\'t support any arguments for status.')
   }
-  await g4cStatus()
+
+  const matrix = await statusMatrix({
+    ...gitConfig,
+    filter: (f) => !f.startsWith(SECRETS_PFX)
+  })
+  if (human === true) {
+    console.log(prettifyMatrix(matrix))
+  }
+  
+  return matrix
+}
+
+const g4cAdd = async (args) => {
+  if (args[0] !== '--all') {
+    throw new Error('We only support "--all" as a parameter.')
+  }
+  
+  const matrix = await g4cStatus([])
+  const result = {
+    unchanged: 0,
+    added: [],
+    removed: [],
+    other: []
+  }
+  for (const status of matrix) {
+    const [filePath, headStatus, workdirStatus, stageStatus] = status
+    if (workdirStatus === WORKDIR_STATUS.get('different_from_head')) {
+      result.added.push(filePath)
+      add({
+        ...gitConfig,
+        filepath: filePath
+      })
+    } else if (
+      headStatus === HEAD_STATUS.get('present') &&
+      workdirStatus === WORKDIR_STATUS.get('identical_to_head')
+    ) {
+      result.unchanged++
+      add({
+        // isomorphic-git's commit function will delete anything not in stage
+        ...gitConfig,
+        filepath: filePath
+      })
+    } else if (
+      headStatus === HEAD_STATUS.get('present') &&
+      workdirStatus === WORKDIR_STATUS.get('absent')
+    ) {
+      // remove not neccessary due to isomorphic-git quirk
+      result.removed.push(filePath)
+    } else {
+      result.other.push(status)
+    }
+  }
+
+  if (result.other.length > 0) {
+    log.warn(
+      `${NS}: addMatrix: stage is in an unexpected state. Please stash your changes to the stage.`,
+      prettifyMatrix(result.other)
+    )
+  } else {
+    await g4cStatus([], { human: true })
+  }
 }
 
 const printReadMe = async () => {
@@ -200,18 +260,17 @@ const main = async () => {
     case 'pull':
       await g4cPull(args)
       break
+    case 'status':
+      await g4cStatus(args, { human: true })
+      break
     case 'add':
-      await addToStage(args)
-      await g4cStatus()
+      await g4cAdd(args)
       break
     case 'commit':
       await g4cCommit(args)
       break
     case 'push':
       await g4cPush(args)
-      break
-    case 'status':
-      await g4cStatus(args)
       break
     default:
       printReadMe()

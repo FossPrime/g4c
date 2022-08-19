@@ -65,87 +65,6 @@
     }
   }
   
-  const makeMapReversible = (map) => map.forEach((v, k, m) => m.set(v, k))
-  const HEAD_STATUS = new Map([
-    ['absent', 0],
-    ['present', 1]
-  ])
-  const WORKDIR_STATUS = new Map([
-    ['absent', 0],
-    ['identical_to_head', 1],
-    ['different_from_head', 2]
-  ])
-  const STAGE_STATUS = new Map([
-    ['absent', 0],
-    ['identical_to_head', 1],
-    ['identical_to_workdir', 2],
-    ['different_from_workdir', 3]
-  ])
-  const STATUS_MAPS = [HEAD_STATUS, WORKDIR_STATUS, STAGE_STATUS]
-  STATUS_MAPS.forEach(makeMapReversible)
-  const gitStatus = async () => {
-    const matrix = await statusMatrix({
-      ...gitConfig,
-      filter: (f) => !f.startsWith('SECRETS.')
-    })
-    return matrix
-  }
-  
-  const gitAdd = async (matrix) => {
-    const result = {
-      unchanged: 0,
-      added: [],
-      removed: [],
-      other: []
-    }
-    for (const status of matrix) {
-      const [filePath, headStatus, workdirStatus, stageStatus] = status
-      if (workdirStatus === WORKDIR_STATUS.get('different_from_head')) {
-        result.added.push(filePath)
-        add({
-          ...gitConfig,
-          filepath: filePath
-        })
-      } else if (
-        headStatus === HEAD_STATUS.get('present') &&
-        workdirStatus === WORKDIR_STATUS.get('identical_to_head')
-      ) {
-        result.unchanged++
-        add({
-          // isomorphic-git's commit function will delete anything not in stage
-          ...gitConfig,
-          filepath: filePath
-        })
-      } else if (
-        headStatus === HEAD_STATUS.get('present') &&
-        workdirStatus === WORKDIR_STATUS.get('absent')
-      ) {
-        // remove not neccessary due to isomorphic-git quirk
-        result.removed.push(filePath)
-      } else {
-        result.other.push(status)
-      }
-    }
-  
-    if (result.other.length > 0) {
-      const prettyOther = result.other.map(
-        ([filePath, headStatus, workdirStatus, stageStatus]) => {
-          console.log({
-            filePath,
-            headStatus: HEAD_STATUS.get(headStatus),
-            workdirStatus: WORKDIR_STATUS.get(workdirStatus),
-            stageStatus: STAGE_STATUS.get(stageStatus)
-          })
-        }
-      )
-      console.warn(
-        `${NS}: addMatrix: stage is in an unexpected state. Please stash your changes to the stage.`,
-        JSON.stringify(prettyOther, null, 2)
-      )
-    }
-  
-    return result
-  }
   
   const gitCommit = async (message) => {
     const sha = await commit({
@@ -163,7 +82,7 @@
     const pushResult = await push({
       ...gitConfig,
       ...gitRemoteConfig,
-      remote: 'origin' // probably unnecesary
+      // remote: 'origin' // probably unnecesary
     })
     return pushResult
   }
@@ -176,7 +95,6 @@
       await gitFastForward()
     }
   
-    const matrix = await gitStatus()
     const addResult = await gitAdd(matrix)
     if (addResult.added.length > 0 || addResult.removed.length > 0) {
       const message =
