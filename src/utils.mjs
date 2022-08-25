@@ -36,20 +36,23 @@ export const passThrough = async (cm) => {
   const sm = {}
   try {
     const { stdout: cmdPath } = await exec(`which ${originalCmd}`)
-    sm.cmdPath = cmdPath
+    sm.cmdPath = cmdPath.trim()
   } catch (_e) {}
 
   if (basename(process.argv[1]) == uniqueCmd) {
     console.log(`${uniqueCmd} called directly, not shimming.`)
     return false
   } else if (sm.cmdPath) {
-    console.log(`${originalCmd} found at ${sm.cmdPath} and using it.`)
-    // https://nodejs.org/api/child_process.html#optionsstdio
-    
-    spawn(originalCmd, process.argv.slice(2), {
-      stdio: ['inherit', 'inherit', 'inherit']
-    })
-    return true
+    const isProxy = sm.cmdPath.endsWith('/node_modules/.bin/git')
+    if (!isProxy){
+      console.log(`${originalCmd} found at ${sm.cmdPath} and using it.`)
+      // https://nodejs.org/api/child_process.html#optionsstdio
+      
+      spawn(originalCmd, process.argv.slice(2), {
+        stdio: ['inherit', 'inherit', 'inherit']
+      })
+      return true
+    }
   } else {
     console.log(`${originalCmd} not found, using ${uniqueCmd} instead.`)
     return false
