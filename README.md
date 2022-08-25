@@ -1,29 +1,30 @@
-# g4c - Git for CodeSandbox
+# g4c - Git for Cloud
 
 A basic pure js git CLI implementation based on isomorphic-git.
 
 - [Git tracker](https://gitlab.com/vblip/g4c)
 
-## Commands we will support
+## Commands supported
 
-- g4c checkout // done
-- g4c checkout --force // done
-- g4c pull // done
-- g4c pull --ff-only // done
-- g4c status
-- g4c add --all
-- g4c commit -m "My commit message"
-- g4c push
+- git checkout --force HEAD
+- git pull
+- git pull --ff-only
+- git status
+- git add --all
+- git commit -m "My commit message"
+- git push
 
 **TODO:**
 
-- g4c add FILE
-- git baremetal passthrough
-- git clone URL
+- git add FILE
+- git clone URL // Currently automatically clones during checkout
 
 ## Setup
 
 `npm i -D g4c`
+
+`npx g4c` or `npx git` will work at that point.  
+In stackblitz `git` and `g4c` both work as node_modules/.bin is in the path.
 
 ### Configuration Precedence
 
@@ -37,6 +38,7 @@ All of these are optional:
 // SECRETS.g4c.json
 {
   "proxy": "https://cors.isomorphic-git.org",
+  "useProxyOnBareMetal": false,
   "username": "inu",
   "password": "neko",
   "authorName": "John Doe",

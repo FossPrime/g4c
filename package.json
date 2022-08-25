@@ -10,13 +10,14 @@
     "name": "Ray Foss",
     "email": "no-g4c@vblip.com"
   },
-  "version": "1.0.4",
+  "version": "1.0.5",
   "license": "GPL-3.0",
   "scripts": {
     "dev": "node index.mjs"
   },
   "bin": {
-    "g4c": "./src/main.mjs"
+    "g4c": "./src/main.mjs",
+    "git": "./src/main.mjs"
   },
   "engineStrict": true,
   "engines": {

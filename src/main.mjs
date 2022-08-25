@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { exec, getConfig, PCMD, SECRETS_PFX, HEAD_STATUS, WORKDIR_STATUS, prettifyMatrix } from './utils.mjs'
+import { getConfig, PKG_NAME, SECRETS_PFX, HEAD_STATUS, WORKDIR_STATUS, prettifyMatrix, passThrough } from './utils.mjs'
 import Log from './logger.mjs'
 import { readFile } from 'node:fs/promises'
 import { URL } from 'node:url'; // in Browser, the URL in native accessible on window
@@ -249,6 +249,10 @@ const main = async () => {
   const command = process.argv[2]
   const args = process.argv.slice(3)
   log.debug('cli arguments:', args)
+
+  if (passThrough({originalCmd: 'git', uniqueCmd: PKG_NAME})) {
+    return
+  }
 
   const currentBranch = await g4cCurrentBranch()
   if (currentBranch === '') {

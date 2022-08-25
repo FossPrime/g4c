@@ -1,9 +1,9 @@
 import { NS } from './logger.mjs'
 import { readFile } from 'node:fs/promises'
 import { userInfo } from 'node:os'
-
-import { promisify } from 'util'
-import { exec as execCb } from 'child_process'
+import { spawn, exec as execCb } from 'node:child_process'
+import { promisify } from 'node:util'
+import { basename } from 'path'
 
 export const PKG_NAME = 'g4c'
 export const SB = '/sandbox'
@@ -30,6 +30,31 @@ const getIsStackBlitz = () => {
   return fingerprint.every(e => e[1] === u[e[0]])
 }
 export const isStackBlitz = getIsStackBlitz()
+
+export const passThrough = async (cm) => {
+  const { originalCmd, uniqueCmd } = cm
+  const sm = {}
+  try {
+    const { stdout: cmdPath } = await exec(`which ${originalCmd}`)
+    sm.cmdPath = cmdPath
+  } catch (_e) {}
+
+  if (basename(process.argv[1]) == uniqueCmd) {
+    console.log(`${uniqueCmd} called directly, not shimming.`)
+    return false
+  } else if (sm.cmdPath) {
+    console.log(`${originalCmd} found at ${sm.cmdPath} and using it.`)
+    // https://nodejs.org/api/child_process.html#optionsstdio
+    
+    spawn(originalCmd, process.argv.slice(2), {
+      stdio: ['inherit', 'inherit', 'inherit']
+    })
+    return true
+  } else {
+    console.log(`${originalCmd} not found, using ${uniqueCmd} instead.`)
+    return false
+  }
+}
 
 /*
 # Configuration Precedence
