@@ -2,6 +2,7 @@
 
 A basic pure js git CLI implementation based on isomorphic-git.
 
+- [NPM](https://www.npmjs.com/package/g4c)
 - [Issue tracker](https://gitlab.com/vblip/g4c/-/issues)
 - [Merge requests](https://gitlab.com/vblip/g4c/-/merge_requests)
 
@@ -47,7 +48,3 @@ All of these are optional:
   "repoUrl": "https://github-sucks.com/user/project.git"
 }
 ```
-
-## Known Issues
-
-[Issue tracker](https://gitlab.com/vblip/g4c/-/issues)
