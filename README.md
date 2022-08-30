@@ -2,7 +2,8 @@
 
 A basic pure js git CLI implementation based on isomorphic-git.
 
-- [Git tracker](https://gitlab.com/vblip/g4c)
+- [Issue tracker](https://gitlab.com/vblip/g4c/-/issues)
+- [Merge requests](https://gitlab.com/vblip/g4c/-/merge_requests)
 
 ## Commands supported
 
