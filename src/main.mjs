@@ -12,7 +12,8 @@ import {
   commit,
   push,
   statusMatrix,
-  checkout
+  checkout,
+  deleteRemote
 } from 'isomorphic-git'
 import isomorphicGitHttpClient from 'isomorphic-git/http/node/index.js'
 import { default as isomorphicGitFsClient } from 'node:fs'
@@ -22,13 +23,12 @@ const NS = 'main'
 
 // const isomorphicGitHttpClient = await import('isomorphic-git/http/node/index.js')
 const isomorphicGitWorkingTreeDir = './'
+const debug = (...args) => globalThis.process?.env?.DEBUG ? console.debug('g4c/core', ...args) : ()=>{}
 
 const config = await getConfig() // BAD structure
 
 // Pseudo-modules
 const pkgDir = new URL('..', import.meta.url).pathname
-const log = new Log({ name: NS, level: 'info' })
-
 
 const gitUrl = new URL(config.repoUrl)
 if (config.username) {
@@ -68,7 +68,7 @@ const g4cCommit = async (args) => {
     ...sm
   })
 
-  log.info(`Commit success, SHA: ${sha}`)
+  console.info(`Commit success, SHA: ${sha}`)
   return sha
 }
 
@@ -76,12 +76,14 @@ const g4cPush = async (args) => {
   if (args.length > 0) {
     throw new Error('We don\'t support any arguments for push.')
   }
+  // if (gitUrl.password) {
+  //   try{await deleteRemote({ ...gitConfig, remote: 'origin' })} catch {}
+  // }
   const pushResult = await push({
     ...gitConfig,
-    ...gitRemoteConfig,
-    // remote: 'origin' // probably unnecesary
+    ...gitRemoteConfig
   })
-  log.info('Push successful.')
+  console.info('Push successful.')
   
   return pushResult
 } 
@@ -92,10 +94,10 @@ const g4cClone = async (args, { init = false } = {}) => {
     noCheckout: false
   }
   if (init === true) {
-    log.info('Initializing...')
+    console.info('Initializing...')
     sm.noCheckout = true
   }
-  // log.info(`${NS}: Running clone.`)
+  // console.info(`${NS}: Running clone.`)
   // TODO: support changing url
   await clone({
     ...gitConfig,
@@ -123,7 +125,7 @@ const g4cPull = async (args) => {
     ...sm
   }
 
-  log.info(`${NS}: Running pull.`)
+  console.info(`${NS}: Running pull.`)
   await pull(params)
 
 }
@@ -148,10 +150,10 @@ const g4cCheckout = async (args) => {
   }
 
   if (sm.FORCE) { // may create a merge commit
-    log.warn(`${NS}: Running FORCE checkout.`) 
+    console.warn(`${NS}: Running FORCE checkout.`) 
     await checkout(Object.assign({},params,{ force: true }))
   } else {
-    log.info(`${NS}: Running checkout.`)
+    console.info(`${NS}: Running checkout.`)
     await checkout(params)
   }
 }
@@ -231,7 +233,7 @@ const g4cAdd = async (args) => {
   }
 
   if (result.other.length > 0) {
-    log.warn(
+    console.warn(
       `${NS}: addMatrix: stage is in an unexpected state. Please stash your changes to the stage.`,
       prettifyMatrix(result.other)
     )
@@ -248,15 +250,13 @@ const printReadMe = async () => {
 const main = async () => {
   const command = process.argv[2]
   const args = process.argv.slice(3)
-  log.debug('cli arguments:', args)
-
+  debug('cli arguments:', args)
   
   if (await passThrough({originalCmd: 'git', uniqueCmd: PKG_NAME})) {
     return
   }
 
   // const currentBranch = await g4cCurrentBranch()
-  
   switch (command) {
     case 'clone':
         const newDirName = process.argv[4] ?? gitUrl.pathname?.split('/')?.at(-1)?.replace(/.git$/, '')

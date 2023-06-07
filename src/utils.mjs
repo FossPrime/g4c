@@ -30,6 +30,7 @@ const getIsStackBlitz = () => {
   return fingerprint.every(e => e[1] === u[e[0]])
 }
 export const isStackBlitz = getIsStackBlitz()
+const debug = (...args) => globalThis.process?.env?.DEBUG ? console.debug('g4c/utils',...args) : ()=>{}
 
 export const passThrough = async (cm) => {
   const { originalCmd, uniqueCmd } = cm
@@ -41,7 +42,7 @@ export const passThrough = async (cm) => {
   } catch (_e) {}
 
   if (basename(process.argv[1]) == uniqueCmd) {
-    console.log(`${uniqueCmd} running.`)
+    debug(`${uniqueCmd} running.`)
     return false
   } else if (sm.cmdPath) {
     const isProxy = sm.cmdPath.endsWith('/node_modules/.bin/git')
@@ -101,7 +102,7 @@ export const getConfig = async () => {
     defaultConfig.repoUrl = (new URL(process.argv[3])).toString()
   } catch {
     if (packageJson?.repository?.type === 'git') {
-      console.log("g4c: Using package.json git repository.")
+      debug("g4c: Using package.json git repository.")
       defaultConfig.repoUrl = packageJson.repository.url
     }
   }
@@ -115,6 +116,14 @@ export const getConfig = async () => {
     result.proxy = undefined
   }
 
+  if (globalThis.process?.env?.G4C_CONFIG) {
+    const g4cConfig = JSON.parse(globalThis.process?.env?.G4C_CONFIG)
+    debug('Reading form ENV', g4cConfig)
+    Object.assign(result, g4cConfig)
+  }
+
+  
+  debug('Reading form ENV', result)
   return result
 }
 
