@@ -9,18 +9,20 @@ A basic pure js git CLI implementation based on isomorphic-git.
 
 ## Commands supported
 
-- git checkout --force HEAD
-- git pull
-- git pull --ff-only
-- git status
-- git add --all
-- git commit -m "My commit message"
-- git push
+- g4c clone URL
+- g4c clone # (automatically clones from package.json, or secrets file)
+- g4c checkout --force HEAD
+- g4c pull
+- g4c pull --ff-only
+- g4c status
+- g4c add --all
+- g4c commit -m "My commit message"
+- g4c push
 
 **TODO:**
 
-- git add FILE
-- git clone URL // Currently automatically clones during checkout
+- g4c add FILE
+
 
 ## Setup
 

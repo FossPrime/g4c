@@ -1,4 +1,6 @@
 /node_modules/
+.cache/
+
 
 # This is not strictly neccesary for private dependents...
 /SECRETS.*.json

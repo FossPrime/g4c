@@ -16,8 +16,7 @@
     "dev": "node index.mjs"
   },
   "bin": {
-    "g4c": "./src/main.mjs",
-    "git": "./src/main.mjs"
+    "g4c": "./src/main.mjs"
   },
   "engineStrict": true,
   "engines": {
