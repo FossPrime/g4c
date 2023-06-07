@@ -1,14 +1,12 @@
-# g4c - Git for Cloud
-
-
-<!--p align="center">
+<p align="center">
   <a href="https://feathersjs.com" target="_blank" rel="noopener noreferrer">
-    <img width="180" src="https://raw.githubusercontent.com/feathersjs/feathers/2b89e0b7fceb42f92c9139f16f3291fa3ff560f1/docs/public/feathersjs.svg" alt="Feathers logo">
+    <img width="180" src="docs/logo.svg" alt="Feathers logo">
   </a>
-</p-->
+</p>
 <br/>
 <p align="center">
-  A basic pure js git CLI implementation based on isomorphic-git.<br>
+  # g4c - Git for Cloud  
+  A basic pure js git CLI implementation based on isomorphic-git.<br><br>
   <a href="https://stackblitz.com/fork/g4c-demo"><img src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt="Open in StackBlitz"></a> 
   <!--a href="https://replit.com/new/github/feathersjs/playground"><img src="https://replit.com/badge/github/feathersjs/playground" alt="Run on Repl.it"></a--> 
 </p>
