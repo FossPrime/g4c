@@ -250,16 +250,22 @@ const main = async () => {
   const args = process.argv.slice(3)
   log.debug('cli arguments:', args)
 
-  if (passThrough({originalCmd: 'git', uniqueCmd: PKG_NAME})) {
+  
+  if (await passThrough({originalCmd: 'git', uniqueCmd: PKG_NAME})) {
     return
   }
 
   const currentBranch = await g4cCurrentBranch()
-  if (currentBranch === '') {
-    await g4cClone(args, { init: true })
-  }
-
+  
   switch (command) {
+    case 'clone':
+      if (currentBranch === '') { // DEPRECATE... too cute
+        await g4cClone(args, { init: true })
+        await g4cCheckout(['HEAD'])
+      } else {
+        console.log(`Already in a .git repo!`)
+      }
+      break
     case 'checkout':
       await g4cCheckout(args)
       break

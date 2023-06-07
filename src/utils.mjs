@@ -35,22 +35,24 @@ export const passThrough = async (cm) => {
   const { originalCmd, uniqueCmd } = cm
   const sm = {}
   try {
-    const { stdout: cmdPath } = await exec(`which ${originalCmd}`)
+    // TODO: bash: fork: retry: Resource temporarily unavailable
+    const { stdout: cmdPath } = await exec(`which ${originalCmd}`) // BAD
     sm.cmdPath = cmdPath.trim()
   } catch (_e) {}
 
   if (basename(process.argv[1]) == uniqueCmd) {
-    console.log(`${uniqueCmd} called directly, not shimming.`)
+    console.log(`${uniqueCmd} running.`)
     return false
   } else if (sm.cmdPath) {
     const isProxy = sm.cmdPath.endsWith('/node_modules/.bin/git')
     if (!isProxy){
       console.log(`${originalCmd} found at ${sm.cmdPath} and using it.`)
       // https://nodejs.org/api/child_process.html#optionsstdio
-      
-      spawn(originalCmd, process.argv.slice(2), {
-        stdio: ['inherit', 'inherit', 'inherit']
-      })
+
+      console.log('// TODO: CAUSES INFINIT LOOP')
+      // spawn(originalCmd, process.argv.slice(2), {
+      //   stdio: ['inherit', 'inherit', 'inherit']
+      // })
       return true
     }
   } else {
@@ -94,8 +96,14 @@ export const getConfig = async () => {
     authorName: 'John Doe',
     authorEmail: 'git@example.com'
   }
-  if (packageJson?.repository?.type === 'git') {
-    defaultConfig.repoUrl = packageJson.repository.url
+  
+  try {
+    defaultConfig.repoUrl = (new URL(process.argv[3])).toString()
+  } catch {
+    if (packageJson?.repository?.type === 'git') {
+      console.log("g4c: Using package.json git repository.")
+      defaultConfig.repoUrl = packageJson.repository.url
+    }
   }
 
   const result = {}
