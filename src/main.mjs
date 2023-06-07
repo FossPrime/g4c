@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { getConfig, PKG_NAME, SECRETS_PFX, HEAD_STATUS, WORKDIR_STATUS, prettifyMatrix, passThrough } from './utils.mjs'
 import Log from './logger.mjs'
-import { readFile } from 'node:fs/promises'
+import { readFile, mkdir } from 'node:fs/promises'
 import { URL } from 'node:url'; // in Browser, the URL in native accessible on window
 import {
   clone,
@@ -23,7 +23,7 @@ const NS = 'main'
 // const isomorphicGitHttpClient = await import('isomorphic-git/http/node/index.js')
 const isomorphicGitWorkingTreeDir = './'
 
-const config = await getConfig()
+const config = await getConfig() // BAD structure
 
 // Pseudo-modules
 const pkgDir = new URL('..', import.meta.url).pathname
@@ -255,16 +255,15 @@ const main = async () => {
     return
   }
 
-  const currentBranch = await g4cCurrentBranch()
+  // const currentBranch = await g4cCurrentBranch()
   
   switch (command) {
     case 'clone':
-      if (currentBranch === '') { // DEPRECATE... too cute
+        const newDirName = process.argv[4] ?? gitUrl.pathname?.split('/')?.at(-1)?.replace(/.git$/, '')
+        await mkdir(newDirName)
+        process.chdir(newDirName)
         await g4cClone(args, { init: true })
         await g4cCheckout(['HEAD'])
-      } else {
-        console.log(`Already in a .git repo!`)
-      }
       break
     case 'checkout':
       await g4cCheckout(args)
