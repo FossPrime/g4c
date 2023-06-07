@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://feathersjs.com" target="_blank" rel="noopener noreferrer">
-    <img width="180" src="docs/logo.svg" alt="Feathers logo">
+    <img width="180" src="https://unpkg.com/g4c@1.2.2/docs/logo.svg" alt="G4C logo">
   </a>
 </p>
 <br/>
