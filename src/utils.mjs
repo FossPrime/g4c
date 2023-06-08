@@ -124,6 +124,16 @@ export const getConfig = async () => {
     Object.assign(result, g4cConfig)
   }
 
+  try {
+    const gitUrl = new URL(result.repoUrl)
+    if (result.username) {
+      gitUrl.username = result.username
+      gitUrl.password = result.password
+    }
+    result.piiUrl = gitUrl.toString()
+  } catch {
+    debug('No URL found in G4C config... this is fine.')
+  }
   
   debug('Reading form ENV', result)
   return result

@@ -30,12 +30,7 @@ const config = await getConfig() // BAD structure
 // Pseudo-modules
 const pkgDir = new URL('..', import.meta.url).pathname
 
-const gitUrl = new URL(config.repoUrl)
-if (config.username) {
-  gitUrl.username = config.username
-  gitUrl.password = config.password
-}
-const isomorphicGitUrl = gitUrl.toString()
+
 // const workdir = tmpdir() + '/' + NS
 const gitConfig = {
   fs: isomorphicGitFsClient,
@@ -45,7 +40,7 @@ const gitConfig = {
 const gitRemoteConfig = {
   http: isomorphicGitHttpClient,
   corsProxy: config.proxy,
-  url: isomorphicGitUrl,
+  url: config.piiUrl || undefined,
   author: { // for commits and hard pull
     name: config.authorName,
     email: config.authorEmail
@@ -247,17 +242,13 @@ const printReadMe = async () => {
 
 const main = async (_node, _js, command, ...args) => {
   debug('cli arguments:', args)
-  
-  if (await passThrough({originalCmd: 'git', uniqueCmd: PKG_NAME})) {
-    return
-  }
 
   // const currentBranch = await g4cCurrentBranch()
   switch (command) {
     case 'clone':
         const urlCliArg = args[0]
         if (urlCliArg) {
-          const newDirName = args[1] ?? gitUrl.pathname?.split('/')?.at(-1)?.replace(/.git$/, '')
+          const newDirName = args[1] ?? new URL(urlCliArg).pathname?.split('/')?.at(-1)?.replace(/.git$/, '')
           await mkdir(newDirName)
           process.chdir(newDirName)
           console.info(`Cloning to ${newDirName}…`)
