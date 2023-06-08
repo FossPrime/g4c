@@ -68,7 +68,6 @@ const g4cCommit = async (args) => {
     ...sm
   })
 
-  console.info(`Commit success, SHA: ${sha}`)
   return sha
 }
 
@@ -94,7 +93,6 @@ const g4cClone = async (args, { init = false } = {}) => {
     noCheckout: false
   }
   if (init === true) {
-    console.info('Clone-ing in place...')
     sm.noCheckout = true
   }
   // console.info(`${NS}: Running clone.`)
@@ -262,6 +260,9 @@ const main = async (_node, _js, command, ...args) => {
           const newDirName = args[1] ?? gitUrl.pathname?.split('/')?.at(-1)?.replace(/.git$/, '')
           await mkdir(newDirName)
           process.chdir(newDirName)
+          console.info(`Cloning to ${newDirName}…`)
+        } else {
+          console.info('Cloning in place…')
         }
         // Attempts to checkout in-place from repo defined in config
         await g4cClone(args, { init: true })
@@ -280,7 +281,8 @@ const main = async (_node, _js, command, ...args) => {
       await g4cAdd(args)
       break
     case 'commit':
-      await g4cCommit(args)
+      const sha = await g4cCommit(args)
+      console.info(`Commit success, SHA: ${sha}`)
       break
     case 'push':
       await g4cPush(args)
