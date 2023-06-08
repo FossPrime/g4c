@@ -94,7 +94,7 @@ const g4cClone = async (args, { init = false } = {}) => {
     noCheckout: false
   }
   if (init === true) {
-    console.info('Initializing...')
+    console.info('Clone-ing in place...')
     sm.noCheckout = true
   }
   // console.info(`${NS}: Running clone.`)
@@ -247,9 +247,7 @@ const printReadMe = async () => {
   process.stdout.write(readMe)
 }
 
-const main = async () => {
-  const command = process.argv[2]
-  const args = process.argv.slice(3)
+const main = async (_node, _js, command, ...args) => {
   debug('cli arguments:', args)
   
   if (await passThrough({originalCmd: 'git', uniqueCmd: PKG_NAME})) {
@@ -259,9 +257,13 @@ const main = async () => {
   // const currentBranch = await g4cCurrentBranch()
   switch (command) {
     case 'clone':
-        const newDirName = process.argv[4] ?? gitUrl.pathname?.split('/')?.at(-1)?.replace(/.git$/, '')
-        await mkdir(newDirName)
-        process.chdir(newDirName)
+        const urlCliArg = args[0]
+        if (urlCliArg) {
+          const newDirName = args[1] ?? gitUrl.pathname?.split('/')?.at(-1)?.replace(/.git$/, '')
+          await mkdir(newDirName)
+          process.chdir(newDirName)
+        }
+        // Attempts to checkout in-place from repo defined in config
         await g4cClone(args, { init: true })
         await g4cCheckout(['HEAD'])
       break
@@ -287,5 +289,5 @@ const main = async () => {
       printReadMe()
   }
 }
-main()
+main(...globalThis.process.argv)
 

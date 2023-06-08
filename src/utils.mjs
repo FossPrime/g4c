@@ -94,8 +94,8 @@ export const getConfig = async () => {
   const defaultConfig = {
     type: PKG_NAME, 
     useProxyOnBareMetal: false, // TODO: Implement this
-    authorName: 'John Doe',
-    authorEmail: 'git@example.com'
+    authorName: packageJson?.author?.name || 'John Doe',
+    authorEmail: packageJson?.author?.email ||'git@example.com'
   }
   
   try {
@@ -116,9 +116,11 @@ export const getConfig = async () => {
     result.proxy = undefined
   }
 
-  if (globalThis.process?.env?.G4C_CONFIG) {
-    const g4cConfig = JSON.parse(globalThis.process?.env?.G4C_CONFIG)
-    debug('Reading form ENV', g4cConfig)
+  // Allow ENV JSON config by package name, ex: G4C_CONFIG_g4c
+  const G4C_CONFIG = globalThis.process?.env['G4C_CONFIG_' + packageJson.name]
+  if (G4C_CONFIG) {
+    const g4cConfig = JSON.parse(G4C_CONFIG)
+    debug('Reading from ENV', g4cConfig)
     Object.assign(result, g4cConfig)
   }
 
