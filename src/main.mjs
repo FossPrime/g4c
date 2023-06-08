@@ -146,7 +146,6 @@ const g4cCheckout = async (args) => {
     console.warn(`${NS}: Running FORCE checkout.`) 
     await checkout(Object.assign({},params,{ force: true }))
   } else {
-    console.info(`${NS}: Running checkout.`)
     await checkout(params)
   }
 }
@@ -251,7 +250,7 @@ const main = async (_node, _js, command, ...args) => {
           const newDirName = args[1] ?? new URL(urlCliArg).pathname?.split('/')?.at(-1)?.replace(/.git$/, '')
           await mkdir(newDirName)
           process.chdir(newDirName)
-          console.info(`Cloning to ${newDirName}…`)
+          console.info(`Cloning to "${newDirName}"…`)
         } else {
           console.info('Cloning in place…')
         }
@@ -260,6 +259,7 @@ const main = async (_node, _js, command, ...args) => {
         await g4cCheckout(['HEAD'])
       break
     case 'checkout':
+      console.info(`${NS}: Running checkout.`)
       await g4cCheckout(args)
       break
     case 'pull':
