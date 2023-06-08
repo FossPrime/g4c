@@ -13,7 +13,8 @@
   },
   "license": "GPL-3.0",
   "scripts": {
-    "dev": "node index.mjs"
+    "dev": "node index.mjs",
+    "publish:stable": "npm dist-tag add g4c@1.4.1 stable"
   },
   "bin": {
     "g4c": "./src/main.mjs"
