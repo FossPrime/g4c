@@ -1,3 +1,5 @@
+#!/bin/bash
+set -euox pipefail
 export npm_config_yes=true 
 
 g4c clone 'https://github.com/piuccio/cowsay.git'

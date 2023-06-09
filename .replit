@@ -7,19 +7,20 @@ hidden=[".config"]
 run = """
 source .config/.bashrc
 # bash --norc # bash: fork: retry: Resource temporarily unavailable
-
+nr test:dev
 """ # "
 
-entrypoint = ".replit"
+entrypoint = "test/index.ts"
 
 [nix]
 channel = "stable-22_11"
 
 [env]
-PATH = "/home/runner/$REPL_SLUG/.config/npm/node_global/bin:/home/runner/$REPL_SLUG/node_modules/.bin:./node_modules/.bin:/home/runner/$REPL_SLUG/bin"
+PATH = "/home/runner/$REPL_SLUG/.config/npm/node_global/bin:/home/runner/$REPL_SLUG/node_modules/.bin:./node_modules/.bin:/home/runner/$REPL_SLUG/bin:$REPL_HOME/.config/pnpm"
 npm_config_prefix = "/home/runner/$REPL_SLUG/.config/npm/node_global" # Global install support
 npm_config_yes="true" # This is a safe space, don't ask stupid questions
 NODE_OPTIONS="--max_old_space_size=384"
+PNPM_HOME = "$REPL_HOME/.config/pnpm"
 # EDITOR="replit-git-editor" # Not reliable, use curl replspace instead
 #NODE_NO_WARNINGS="1"
 

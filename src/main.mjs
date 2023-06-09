@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { getConfig, PKG_NAME, SECRETS_PFX, HEAD_STATUS, WORKDIR_STATUS, prettifyMatrix, passThrough } from './utils.mjs'
-import Log from './logger.mjs'
+import { getConfig, PKG_NAME, SECRETS_PFX, HEAD_STATUS, WORKDIR_STATUS, prettifyMatrix, passThrough } from './utils.js'
+import Log from './logger.js'
 import { readFile, mkdir } from 'node:fs/promises'
 import { URL } from 'node:url'; // in Browser, the URL in native accessible on window
 import {
@@ -25,7 +25,7 @@ const NS = 'main'
 const isomorphicGitWorkingTreeDir = './'
 const debug = (...args) => globalThis.process?.env?.DEBUG ? console.debug('g4c/core', ...args) : ()=>{}
 
-const config = await getConfig() // BAD structure
+const config = await getConfig(globalThis.process?.argv[3]) // BAD structure
 
 // Pseudo-modules
 const pkgDir = new URL('..', import.meta.url).pathname
@@ -40,7 +40,7 @@ const gitConfig = {
 const gitRemoteConfig = {
   http: isomorphicGitHttpClient,
   corsProxy: config.proxy,
-  url: config.piiUrl || undefined,
+  url: config.URL?.piiUrl || undefined, // .git may have the URL, we don't read that
   author: { // for commits and hard pull
     name: config.authorName,
     email: config.authorEmail
@@ -245,9 +245,10 @@ const main = async (_node, _js, command, ...args) => {
   // const currentBranch = await g4cCurrentBranch()
   switch (command) {
     case 'clone':
-        const urlCliArg = args[0]
+        const urlCliArg = args[0] // url passed by CLI
+        const dirNameArg = args[1]
         if (urlCliArg) {
-          const newDirName = args[1] ?? new URL(urlCliArg).pathname?.split('/')?.at(-1)?.replace(/.git$/, '')
+          const newDirName = dirNameArg || config.URL.newDirName // no one has the URL, throw
           await mkdir(newDirName)
           process.chdir(newDirName)
           console.info(`Cloning to "${newDirName}"…`)

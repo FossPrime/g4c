@@ -1,4 +1,5 @@
-import { NS } from './logger.mjs'
+import { NS } from './logger.js'
+import { URLConverter } from './URLConverter.js'
 import { readFile } from 'node:fs/promises'
 import { userInfo } from 'node:os'
 import { spawn, exec as execCb } from 'node:child_process'
@@ -69,7 +70,7 @@ export const passThrough = async (cm) => {
 - Finally, SECRETS.g4c.json can veto all others
 */
 const configCache = {}
-export const getConfig = async () => {
+export const getConfig = async (passedUrlStr) => {
   if (configCache.type === PKG_NAME) {
     return configCache
   } 
@@ -99,11 +100,11 @@ export const getConfig = async () => {
   }
   
   try {
-    defaultConfig.repoUrl = (new URL(process.argv[3])).toString()
+    defaultConfig.configuredUrl = (new URL(process.argv[3])).toString()
   } catch {
     if (packageJson?.repository?.type === 'git') {
       debug("g4c: Using package.json git repository.")
-      defaultConfig.repoUrl = packageJson.repository.url
+      defaultConfig.configuredUrl = packageJson.repository.url
     }
   }
 
@@ -125,14 +126,13 @@ export const getConfig = async () => {
   }
 
   try {
-    const gitUrl = new URL(result.repoUrl)
-    if (result.username) {
-      gitUrl.username = result.username
-      gitUrl.password = result.password
-    }
-    result.piiUrl = gitUrl.toString()
-  } catch {
-    debug('No URL found in G4C config... this is fine.')
+    const converter = passedUrlStr ?
+      new URLConverter(passedUrlStr) :
+      new URLConverter(result.configuredUrl)
+    result.URL = converter.parsePseudoGitUrl()
+  } catch (e){
+    debug('No URL found in G4C config... this is fine.', passedUrlStr, result.configuredUrl)
+    debug(e)
   }
   
   debug('Reading form ENV', result)
