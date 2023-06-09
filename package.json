@@ -1,5 +1,5 @@
 {
-  "version": "1.5.0",
+  "version": "1.5.1",
   "type": "module",
   "name": "g4c",
   "description": "A basic pure js git CLI implementation based on isomorphic-git.",

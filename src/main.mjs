@@ -40,7 +40,7 @@ const gitConfig = {
 const gitRemoteConfig = {
   http: isomorphicGitHttpClient,
   corsProxy: config.proxy,
-  url: config.URL?.piiUrl || undefined, // .git may have the URL, we don't read that
+  url: config.URL?.piiUrl?.toString() || undefined, // .git may have the URL, we don't read that
   author: { // for commits and hard pull
     name: config.authorName,
     email: config.authorEmail
