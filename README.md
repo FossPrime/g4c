@@ -40,6 +40,7 @@
 - git # As an alias, comming soon
 - g4c add FILE(s)
 - g4c add .
+- git pull origin pull/123/head
 ```
 
 
@@ -52,6 +53,17 @@
 `npx g4c` or `npx git` will work at that point.  
 In stackblitz `git` and `g4c` both work as node_modules/.bin is in the path.
 -->
+
+## Goals
+
+1. **Make common git commands easy to use in JavaScript shells 🚀**
+    * This includes commands such as `git clone`, `git pull`, and `git push`.
+2. **Provide configuration options via config file, package.json and ENV variables ⚙️**
+    * This will make it easier for developers to customize the behavior of g4c to match their specific needs.
+3. **Minimize cold-boot time and overhead in browser environments ⏱️**
+    * This is important for web IDEs. By minimizing the cold-boot time, developers can maximize cycle time and review PR's more efficiently.
+4. **Improve the developer experience (DX) for JS devs as much as possible 👩‍💻**
+    * Following in the foot steps of vite and git to improve workflows.
 
 ### Configuration Precedence
 
