@@ -100,11 +100,11 @@ export const getConfig = async (passedUrlStr) => {
   }
   
   try {
-    defaultConfig.configuredUrl = (new URL(process.argv[3])).toString()
+    defaultConfig.repoUrl = (new URL(process.argv[3])).toString()
   } catch {
     if (packageJson?.repository?.type === 'git') {
       debug("g4c: Using package.json git repository.")
-      defaultConfig.configuredUrl = packageJson.repository.url
+      defaultConfig.repoUrl = packageJson.repository.url
     }
   }
 
@@ -128,10 +128,10 @@ export const getConfig = async (passedUrlStr) => {
   try {
     const converter = passedUrlStr ?
       new URLConverter(passedUrlStr) :
-      new URLConverter(result.configuredUrl)
+      new URLConverter(result.repoUrl)
     result.URL = converter.parsePseudoGitUrl()
   } catch (e){
-    debug('No URL found in G4C config... this is fine.', passedUrlStr, result.configuredUrl)
+    debug('No URL found in G4C config... this is fine.', passedUrlStr, result.repoUrl)
     debug(e)
   }
   
