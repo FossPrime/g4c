@@ -81,6 +81,8 @@ test('convert PR URL with correct newDirName and branch', (t) => {
   strictEqual(actualOutput.branch, expectedBranchName)
 });
 
+// git clone https://gh/piuccio/cowsay './'
+
 // More tests for the other URLs...
 // https://https://hithib.com
 // ssh://git@github.com:FossPrime/halloween.git

@@ -247,7 +247,7 @@ const main = async (_node, _js, command, ...args) => {
     case 'clone':
         const urlCliArg = args[0] // url passed by CLI
         const dirNameArg = args[1]
-        if (urlCliArg) {
+        if (urlCliArg && urlCliArg !== './') {
           const newDirName = dirNameArg || config.URL.newDirName // no one has the URL, throw
           await mkdir(newDirName)
           process.chdir(newDirName)
