@@ -13,7 +13,8 @@ import {
   push,
   statusMatrix,
   checkout,
-  deleteRemote
+  deleteRemote,
+  fetch
 } from 'isomorphic-git'
 import isomorphicGitHttpClient from 'isomorphic-git/http/node/index.js'
 import { default as isomorphicGitFsClient } from 'node:fs'
@@ -101,12 +102,17 @@ const g4cClone = async (args, { init = false } = {}) => {
   })
 }
 
+// Good for pull requests
 const g4cPull = async (args) => {
+  debug('g4cPull args', args)
   const sm = {
-    fastForwardOnly: false
+    fastForwardOnly: false,
+    fetchOriginBranch: ''
   }
   if (args.length === 1 && args[0] === '--ff-only') {
     sm.fastForwardOnly = true
+  } else if (args.length === 2 && args[0] === '--fetch-origin') {
+    sm.fetchOriginBranch = args[1]
   } else if (args.length !== 0) {
     throw new Error('We don\'t support any arguments for pull.')
   }
@@ -114,13 +120,16 @@ const g4cPull = async (args) => {
   const params = {
     ...gitConfig, 
     ...gitRemoteConfig,
-    singleBranch: true,
-    ...sm
+    singleBranch: true
   }
 
-  console.info(`${NS}: Running pull.`)
-  await pull(params)
-
+  if (sm.fetchOriginBranch) {
+    await pull({...params, remoteRef: sm.fetchOriginBranch})
+  } else if (sm.fastForwardOnly) {
+    await pull({params, fastForwardOnly: true })
+  } else {
+    await pull(params)
+  }
 }
 
 const g4cCheckout = async (args) => {
@@ -260,6 +269,9 @@ const main = async (_node, _js, command, ...args) => {
         // Attempts to checkout in-place from repo defined in config
         await g4cClone(args, { init: true })
         await g4cCheckout(['HEAD'])
+        if (config.URL.branch) {
+          await g4cPull(['--fetch-origin', config.URL.branch])
+        }
       break
     case 'checkout':
       console.info(`${NS}: Running checkout.`)

@@ -1,5 +1,5 @@
 export npm_config_yes=true 
-DEMODIR=DEMO-`date +%FT%TZ`
+DEMODIR=demo-`date +%FT%TZ`
 mkdir $DEMODIR
 cd $DEMODIR
 sleep 1

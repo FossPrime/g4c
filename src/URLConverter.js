@@ -12,7 +12,6 @@ SHORT_NAMES.forEach((full) => { // allow TLD less urls
   SHORT_NAMES.set(full.split('.').at(0) , full)
 })
 
-
 export class URLConverter {
   constructor(inputUrl) {
     this.original = inputUrl;
@@ -55,7 +54,6 @@ export class URLConverter {
       piiUrl: splitPii.piiUrl.toString(),
       repo: this.original, // ques qu ce?
       newDirName
-      // branch: null, // todo
     }
     debug('FINAL RESULT', final)
     return final

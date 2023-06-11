@@ -3,7 +3,7 @@ import test from 'node:test'
 import { strictEqual } from 'node:assert'
 import { URLConverter } from '../src/URLConverter.js'
 
-process.chdir('/tmp')
+globalThis.process.chdir('/tmp')
 console.log(`
  _____
 < CI IS WORKING! > 
