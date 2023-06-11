@@ -5,8 +5,8 @@ hidden=[".config"]
 # compile="npm i" # No runtime ENV vars
 # run = ["npm", "run", "dev"] # Use TOML's """ for a multiline bash script
 run = """
-source .config/.bashrc
-# bash --norc # bash: fork: retry: Resource temporarily unavailable
+clear
+# source config/.bashrc
 nr test:dev
 """ # "
 

@@ -25,9 +25,21 @@ export class URLConverter {
     3. 
   */
   parsePseudoGitUrl() {
+    const result = {
+      original: this.original,
+    }
     try {
       this.url = this.#enforceHttpsProtocol(this.original)
       this.url = this.#spreadShortName(this.url.toString())
+      const pathTokens = this.url.pathname.split('/')
+      const lastSlug = pathTokens.at(-1)
+      const penultimateSlug = pathTokens.at(-2)
+      const prId = parseInt(lastSlug)
+      if (!Number.isNaN(prId) && penultimateSlug === 'pull') {
+        this.url.pathname = pathTokens.slice(0, -2).join('/')
+        result.branch = `pull/${prId}/head`
+      }
+      debug('pre appendGitExt', this.url)
       this.url = this.#appendGitExtension(this.url.toString())
     } catch (e) {
       debug('ERROR', this, e)
@@ -37,16 +49,16 @@ export class URLConverter {
 
     const newDirName = splitPii.cleanUrl.pathname?.split('/')?.at(-1)?.replace(/.git$/, '')
 
-    const result = {
-      original: this.original,
+    const final = {
+      ...result,
       url: splitPii.cleanUrl.toString(),
       piiUrl: splitPii.piiUrl.toString(),
-      repo: this.original,
+      repo: this.original, // ques qu ce?
       newDirName
       // branch: null, // todo
     }
-    debug('RESULT', result)
-    return result
+    debug('FINAL RESULT', final)
+    return final
   }
   
   // private method that strips protocols from the input url
@@ -106,19 +118,14 @@ export class URLConverter {
   // Todo: Glitch.com uses username as password...
   #filterPii(urlStr) {
     const dirtyUrl = new URL(urlStr)
+    const cleanUrl = new URL(urlStr)
     if (dirtyUrl.password) {
-      const cleanUrl = new URL(urlStr)
-      cleanUrl.password = ''
-      cleanUrl.username = ''
-      return {
+        cleanUrl.password = ''
+        cleanUrl.username = ''
+    }
+    return {
         piiUrl: dirtyUrl,
         cleanUrl
-      }
-    } else {
-      return {
-        piiUrl: dirtyUrl,
-        cleanUrl: dirtyUrl
-      }
     }
   }
 }

@@ -3,18 +3,17 @@ import test from 'node:test'
 import { strictEqual } from 'node:assert'
 import { URLConverter } from '../src/URLConverter.js'
 
-const cowsayjs = `
+process.chdir('/tmp')
+console.log(`
  _____
 < CI IS WORKING! > 
  -----
-        \   ^__^
-         \  (oo)\_______
-            (__)\       )\/\
+        |   ^__^
+         |  (oo)=_______
+           %(__)%       )=~^
                 ||----w |
                 ||     ||
-`
-
-console.log(cowsayjs)
+`)
 
 // - From sub folders
 //   - https://github.com/vitejs/vite/tree/main/packages/create-vite/template-vanilla-ts
@@ -74,13 +73,16 @@ test('convert PR URL with correct newDirName and branch', (t) => {
   const converter = new URLConverter(piiStr)
   const expectedUrl = 'https://github.com/marshallswain/feathers-pinia.git'
   const expectedDirName = 'feathers-pinia'
-  const expectedBranchName = 'pull/132/HEAD'
+  const expectedBranchName = 'pull/132/head'
   const actualOutput = converter.parsePseudoGitUrl()
   strictEqual(actualOutput.url, expectedUrl)
   strictEqual(actualOutput.newDirName, expectedDirName)
   strictEqual(actualOutput.branch, expectedBranchName)
 });
 
+// test('Can clone regular repos', (t) => {
+
+  
 // git clone https://gh/piuccio/cowsay './'
 
 // More tests for the other URLs...

@@ -240,15 +240,17 @@ const printReadMe = async () => {
 }
 
 const main = async (_node, _js, command, ...args) => {
-  debug('cli arguments:', args)
+  debug('cli arguments:', command, args)
+  debug('MAIN CONFIG', config)
 
   // const currentBranch = await g4cCurrentBranch()
   switch (command) {
     case 'clone':
         const urlCliArg = args[0] // url passed by CLI
         const dirNameArg = args[1]
-        if (urlCliArg && urlCliArg !== './') {
+        if (urlCliArg && dirNameArg !== './') {
           const newDirName = dirNameArg || config.URL.newDirName // no one has the URL, throw
+          debug('mkdir newDirName:', newDirName)
           await mkdir(newDirName)
           process.chdir(newDirName)
           console.info(`Cloning to "${newDirName}"…`)
