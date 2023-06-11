@@ -8,4 +8,4 @@
 # DX aid
 _gitignore
 /temp.js
-data/
+DEMO-*

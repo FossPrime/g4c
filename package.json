@@ -13,6 +13,7 @@
   },
   "license": "GPL-3.0",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "dev": "node index.mjs",
     "test:dev": "tsx --watch ./test/index.ts",
     "test": "tsx ./test/index.ts",
@@ -23,11 +24,12 @@
   },
   "engineStrict": true,
   "engines": {
-    "node": ">= 16"
+    "node": ">= 16",
+    "pnpm": ">= 7"
   },
   "files": ["src/*js"],
   "dependencies": {
-    "isomorphic-git": "^1.19.2"
+    "isomorphic-git": "^1.24.0"
   },
   "keywords": [
     "stackblitz",
