@@ -50,14 +50,14 @@ test('convert gh host to GitHub URL', (t) => {
   const expectedOutput = 'https://github.com/marshallswain/feathers-pinia.git'
   const actualOutput = converter.parsePseudoGitUrl()
   strictEqual(actualOutput.url, expectedOutput)
-});
+})
 
 test('convert https://gh host to GitHub URL', (t) => {
   const converter = new URLConverter('https://gh/marshallswain/feathers-pinia')
   const expectedOutput = 'https://github.com/marshallswain/feathers-pinia.git'
   const actualOutput = converter.parsePseudoGitUrl()
   strictEqual(actualOutput.url, expectedOutput)
-});
+})
 
 test('convert https://user:pass@x.com host to clean URL', (t) => {
   const piiStr = 'https://user:pass@x.com/path/to/repo'
@@ -66,7 +66,7 @@ test('convert https://user:pass@x.com host to clean URL', (t) => {
   const actualOutput = converter.parsePseudoGitUrl()
   strictEqual(actualOutput.url, expectedOutput)
   strictEqual(actualOutput.piiUrl, piiStr + '.git')
-});
+})
 
 test('convert PR URL with correct newDirName and branch', (t) => {
   const piiStr = 'https://github.com/marshallswain/feathers-pinia/pull/132'
@@ -77,14 +77,31 @@ test('convert PR URL with correct newDirName and branch', (t) => {
   const actualOutput = converter.parsePseudoGitUrl()
   strictEqual(actualOutput.url, expectedUrl)
   strictEqual(actualOutput.newDirName, expectedDirName)
+  strictEqual(actualOutput.virtualBranch, expectedBranchName)
+})
+
+
+test('convert URL with user/repo/tree/branch format', (t) => {
+  const piiStr = 'https://github.com/feathersjs/playground/tree/main'
+  const converter = new URLConverter(piiStr)
+  const expectedUrl = 'https://github.com/marshallswain/feathers-pinia.git'
+  const expectedDirName = 'feathers-pinia'
+  const expectedBranchName = 'pull/132/head'
+  const actualOutput = converter.parsePseudoGitUrl()
+  strictEqual(actualOutput.url, expectedUrl)
+  strictEqual(actualOutput.newDirName, expectedDirName)
   strictEqual(actualOutput.branch, expectedBranchName)
-});
+})
 
 // test('Can clone regular repos', (t) => {
 
   
 // git clone https://gh/piuccio/cowsay './'
 
+// PR and Branch that ends with forward slash
+
+// Clone a branch that happens to be the default branch
+//   - https://github.com/piuccio/cowsay/tree/master
 // More tests for the other URLs...
 // https://https://hithib.com
 // ssh://git@github.com:FossPrime/halloween.git

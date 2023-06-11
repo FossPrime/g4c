@@ -11,7 +11,8 @@ type ParsedGitURL = {
   url: string // ssh or https formatted remote URL
   newDirName: string
   piiUrl?: string // ssh or https formatted URL with PII removed
-  branch?: string // PR and tree branch names
+  branch?: string // tree branch names
+  virtualBranch: string // PR branch name
 }
 declare class URLConverter {
     constructor(inputUrl: string, options?: URLConverterOptions);

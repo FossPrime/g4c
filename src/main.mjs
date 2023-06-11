@@ -14,7 +14,8 @@ import {
   statusMatrix,
   checkout,
   deleteRemote,
-  fetch
+  fetch,
+  listBranches
 } from 'isomorphic-git'
 import isomorphicGitHttpClient from 'isomorphic-git/http/node/index.js'
 import { default as isomorphicGitFsClient } from 'node:fs'
@@ -84,7 +85,7 @@ const g4cPush = async (args) => {
 } 
 
 
-const g4cClone = async (args, { init = false } = {}) => {
+const g4cClone = async (args, { init = false, ref = undefined } = {}) => {
   const sm = {
     noCheckout: false
   }
@@ -98,11 +99,24 @@ const g4cClone = async (args, { init = false } = {}) => {
     ...gitRemoteConfig,
     singleBranch: true,
     depth: 1,
-    ...sm
+    ...sm,
+    ref
   })
 }
 
 // Good for pull requests
+/*
+ // Wont merge out of sync PR branches... solution?
+ // Could help when cloning comit ID's
+    await fetch({...params, remoteRef: sm.fetchOriginBranch})
+    const branches = await listBranches({ ...params, remote: 'origin' })
+    console.log(branches)
+    const coArgs = { ...params, remoteRef: sm.fetchOriginBranch, remote: 'origin' }
+    console.log('coArgs', {coArgs})
+    await checkout(coArgs)
+    const onBranch = await currentBranch({ ...params, fullname: true })
+    console.log(onBranch)
+*/
 const g4cPull = async (args) => {
   debug('g4cPull args', args)
   const sm = {
@@ -147,7 +161,7 @@ const g4cCheckout = async (args) => {
   const params = {
     ...gitConfig, 
     ...gitRemoteConfig,
-    singleBranch: true, 
+    singleBranch: true
     // corsProxy: proxy, we don't need this as it's saved in repo config.
   }
 
@@ -267,10 +281,13 @@ const main = async (_node, _js, command, ...args) => {
           console.info('Cloning in place…')
         }
         // Attempts to checkout in-place from repo defined in config
-        await g4cClone(args, { init: true })
+        await g4cClone(args, { 
+          init: true,
+          ref: config.URL.branch
+        })
         await g4cCheckout(['HEAD'])
-        if (config.URL.branch) {
-          await g4cPull(['--fetch-origin', config.URL.branch])
+        if (config.URL.virtualBranch) {
+          await g4cPull(['--fetch-origin', config.URL.virtualBranch])
         }
       break
     case 'checkout':

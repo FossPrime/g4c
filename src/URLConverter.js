@@ -30,14 +30,30 @@ export class URLConverter {
     try {
       this.url = this.#enforceHttpsProtocol(this.original)
       this.url = this.#spreadShortName(this.url.toString())
-      const pathTokens = this.url.pathname.split('/')
+      this.url.pathname = this.url.pathname.replace(/\/$/, '') // Probably optimized
+      
+      // [ '', 'user', 'repo', 'tree', 'branch' ]
+      const pathTokens = this.url.pathname.split('/') // starts with /
       const lastSlug = pathTokens.at(-1)
       const penultimateSlug = pathTokens.at(-2)
       const prId = parseInt(lastSlug)
-      if (!Number.isNaN(prId) && penultimateSlug === 'pull') {
+      if (
+        !Number.isNaN(prId) && 
+        penultimateSlug === 'pull' &&
+        pathTokens.length > 3
+      ) {
+        debug('Detected PR URL')
         this.url.pathname = pathTokens.slice(0, -2).join('/')
-        result.branch = `pull/${prId}/head`
+        result.virtualBranch = `pull/${prId}/head`
+      } else if (
+        penultimateSlug === 'tree' &&
+        pathTokens.length === 5
+      ) {
+        debug('Detected git tree branch URL')
+        this.url.pathname = pathTokens.slice(0, -2).join('/')
+        result.branch = lastSlug
       }
+      
       debug('pre appendGitExt', this.url)
       this.url = this.#appendGitExtension(this.url.toString())
     } catch (e) {
