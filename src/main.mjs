@@ -14,8 +14,8 @@ import {
   statusMatrix,
   checkout,
   deleteRemote,
-  fetch,
-  listBranches
+  // fetch, // May be used in bastard PR fetching
+  // listBranches
 } from 'isomorphic-git'
 import isomorphicGitHttpClient from 'isomorphic-git/http/node/index.js'
 import { default as isomorphicGitFsClient } from 'node:fs'

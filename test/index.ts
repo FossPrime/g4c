@@ -68,25 +68,36 @@ test('convert https://user:pass@x.com host to clean URL', (t) => {
   strictEqual(actualOutput.piiUrl, piiStr + '.git')
 })
 
-test('convert PR URL with correct newDirName and branch', (t) => {
-  const piiStr = 'https://github.com/marshallswain/feathers-pinia/pull/132'
+test('convert PR URL with correct newDirName and branch and stray /', (t) => {
+  const piiStr = 'https://github.com/marshallswain/feathers-pinia/pull/132/'
   const converter = new URLConverter(piiStr)
   const expectedUrl = 'https://github.com/marshallswain/feathers-pinia.git'
   const expectedDirName = 'feathers-pinia'
-  const expectedBranchName = 'pull/132/head'
+  const expectedVBranchName = 'pull/132/head'
   const actualOutput = converter.parsePseudoGitUrl()
   strictEqual(actualOutput.url, expectedUrl)
   strictEqual(actualOutput.newDirName, expectedDirName)
-  strictEqual(actualOutput.virtualBranch, expectedBranchName)
+  strictEqual(actualOutput.virtualBranch, expectedVBranchName)
 })
 
+test('convert PR URL with correct newDirName and branch', (t) => {
+  const piiStr = 'https://github.com/feathersjs/feathers/pull/132'
+  const converter = new URLConverter(piiStr)
+  const expectedUrl = 'https://github.com/feathersjs/feathers.git'
+  const expectedDirName = 'feathers'
+  const expectedVBranchName = 'pull/132/head'
+  const actualOutput = converter.parsePseudoGitUrl()
+  strictEqual(actualOutput.url, expectedUrl)
+  strictEqual(actualOutput.newDirName, expectedDirName)
+  strictEqual(actualOutput.virtualBranch, expectedVBranchName)
+})
 
 test('convert URL with user/repo/tree/branch format', (t) => {
-  const piiStr = 'https://github.com/feathersjs/playground/tree/main'
+  const piiStr = 'https://github.com/feathersjs/playground/tree/template-starter'
   const converter = new URLConverter(piiStr)
-  const expectedUrl = 'https://github.com/marshallswain/feathers-pinia.git'
-  const expectedDirName = 'feathers-pinia'
-  const expectedBranchName = 'pull/132/head'
+  const expectedUrl = 'https://github.com/feathersjs/playground.git'
+  const expectedDirName = 'playground'
+  const expectedBranchName = 'template-starter'
   const actualOutput = converter.parsePseudoGitUrl()
   strictEqual(actualOutput.url, expectedUrl)
   strictEqual(actualOutput.newDirName, expectedDirName)
